@@ -38,16 +38,54 @@ impl Maze {
     }
 
     pub fn show(&self) {
-        for row in 0..self.height {
-            for col in 0..self.width {
-                if self.get_cell_ref(row, col).visited == false {
-                    print!("0");
-                } else {
-                    print!("1");
-                }
-            }
-            println!();
+
+        let mut top = "┏━".to_string();
+        for col in 0..(self.width - 1) {
+            top.push(if self.get_cell_ref(0, col).walls[1] {'┳'} else {'━'});
+            top.push('━');
         }
+        top.push('┓');
+        println!("\n{}", top);
+
+        for y in 0..(self.height - 1) {
+            let mut row = if self.get_cell_ref(y, 0).walls[2] {
+                "┣━".to_string()
+            } else {
+                "┃ ".to_string()
+            };
+            for x in 1..self.width {
+                row.push(
+                    self.get_inner_junction(
+                        self.get_cell_ref(y, x - 1),
+                        self.get_cell_ref(y + 1, x),
+                    )
+                );
+                row.push(if self.get_cell_ref(y, x).walls[2] {'━'} else {' '});
+            }
+            row.push(if self.get_cell_ref(y, self.width - 1).walls[2] {
+                '┫'
+            } else {
+                '┃'
+            });
+            println!("{}", row);
+        }
+
+        let mut bot = "┗━".to_string();
+        for col in 0..(self.width - 1) {
+            bot.push(if self.get_cell_ref(self.height - 1, col).walls[1] {'┻'} else {'━'});
+            bot.push('━');
+        }
+        bot.push('┛');
+        println!("{}\n", bot);
+    }
+
+    fn get_inner_junction(&self, top_left_cell: &Cell, bottom_right_cell: &Cell) -> char {
+        let lookup: i8 =
+            ((top_left_cell.walls[2] as i8) << 3 | (top_left_cell.walls[1] as i8) << 1) |
+            ((bottom_right_cell.walls[0] as i8) << 2 | (bottom_right_cell.walls[3] as i8));
+
+        [' ', '╻', '╹', '┃', '╺', '┏', '┗', '┣',
+            '╸', '┓', '┛', '┫', '━', '┳', '┻', '╋'][lookup as usize]
     }
 
     fn get_maze_dimensions() -> (usize, usize) {
