@@ -40,7 +40,7 @@ impl Maze {
     pub fn show(&self) {
         for row in 0..self.height {
             for col in 0..self.width {
-                if self.get_cell_ref(col, row).visited == false {
+                if self.get_cell_ref(row, col).visited == false {
                     print!("0");
                 } else {
                     print!("1");
