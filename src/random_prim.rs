@@ -8,7 +8,7 @@ pub fn create_maze(maze: &mut Maze) {
 
     {
         let start: (usize, usize) = find_start(maze);
-        maze.grid[start.0][start.1].visit();
+        maze.visit_cell(start.0, start.1);
         add_cells_to_frontier(&maze, (start.0, start.1), &mut frontier);
     }
 
@@ -16,7 +16,7 @@ pub fn create_maze(maze: &mut Maze) {
         let rand_frontier = rand_frontier(&mut frontier);
         let direction_of_rand_visited_neighbor: usize = choose_rand_neighbor(&maze, rand_frontier);
         remove_walls_between_cells(maze, rand_frontier, direction_of_rand_visited_neighbor);
-        maze.grid[rand_frontier.0][rand_frontier.1].visit();
+        maze.visit_cell(rand_frontier.0, rand_frontier.1);
         add_cells_to_frontier(&maze, rand_frontier, &mut frontier);
     }
 }
@@ -33,22 +33,22 @@ fn add_cells_to_frontier(maze: &Maze, cell_coords: (usize, usize), frontier: &mu
     let mut new_frontier_cells: Vec<(usize, usize)> = Vec::new();
 
     if cell_coords.0 > 0 {
-        if maze.grid[cell_coords.0 - 1][cell_coords.1].visited == false {
+        if maze.get_cell_ref(cell_coords.0 - 1, cell_coords.1).visited == false {
             new_frontier_cells.push((cell_coords.0 - 1, cell_coords.1))
         }
     }
     if cell_coords.0 < maze.height - 1 {
-        if maze.grid[cell_coords.0 + 1][cell_coords.1].visited == false {
+        if maze.get_cell_ref(cell_coords.0 + 1, cell_coords.1).visited == false {
             new_frontier_cells.push((cell_coords.0 + 1, cell_coords.1));
         }
     }
     if cell_coords.1 > 0 {
-        if maze.grid[cell_coords.0][cell_coords.1 - 1].visited == false {
+        if maze.get_cell_ref(cell_coords.0 , cell_coords.1 - 1).visited == false {
             new_frontier_cells.push((cell_coords.0, cell_coords.1 - 1));
         }
     }
     if cell_coords.1 < maze.width - 1 {
-        if maze.grid[cell_coords.0][cell_coords.1 + 1].visited == false {
+        if maze.get_cell_ref(cell_coords.0 , cell_coords.1 + 1).visited == false {
             new_frontier_cells.push((cell_coords.0, cell_coords.1 + 1));
         }
     }
@@ -69,22 +69,22 @@ fn choose_rand_neighbor(maze: &Maze, frontier_cell_coords: (usize, usize)) -> us
 
     for direction in directions {
         if direction == 0 && frontier_cell_coords.0 > 0 {
-            if maze.grid[frontier_cell_coords.0 - 1][frontier_cell_coords.1].visited {
-                return direction;
-            }
-        }
-        if direction == 2 && frontier_cell_coords.0 < maze.height - 1 {
-            if maze.grid[frontier_cell_coords.0 + 1][frontier_cell_coords.1].visited {
+            if maze.get_cell_ref(frontier_cell_coords.0 - 1, frontier_cell_coords.1).visited {
                 return direction;
             }
         }
         if direction == 1 && frontier_cell_coords.1 < maze.width - 1 {
-            if maze.grid[frontier_cell_coords.0][frontier_cell_coords.1 + 1].visited {
+            if maze.get_cell_ref(frontier_cell_coords.0, frontier_cell_coords.1 + 1).visited {
+                return direction;
+            }
+        }
+        if direction == 2 && frontier_cell_coords.0 < maze.height - 1 {
+            if maze.get_cell_ref(frontier_cell_coords.0 + 1, frontier_cell_coords.1).visited {
                 return direction;
             }
         }
         if direction == 3 && frontier_cell_coords.1 > 0 {
-            if maze.grid[frontier_cell_coords.0][frontier_cell_coords.1 - 1].visited {
+            if maze.get_cell_ref(frontier_cell_coords.0, frontier_cell_coords.1 - 1).visited {
                 return direction;
             }
         }
@@ -95,20 +95,20 @@ fn choose_rand_neighbor(maze: &Maze, frontier_cell_coords: (usize, usize)) -> us
 fn remove_walls_between_cells(maze: &mut Maze, frontier_cell: (usize, usize), direction: usize) {
     match direction {
         0 => {
-            maze.grid[frontier_cell.0][frontier_cell.1].remove_wall(0);
-            maze.grid[frontier_cell.0 - 1][frontier_cell.1].remove_wall(2);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 0);
+            maze.remove_cell_wall(frontier_cell.0 - 1, frontier_cell.1, 2);
         }
         1 => {
-            maze.grid[frontier_cell.0][frontier_cell.1].remove_wall(1);
-            maze.grid[frontier_cell.0][frontier_cell.1 + 1].remove_wall(3);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 1);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1 + 1, 3);
         }
         2 => {
-            maze.grid[frontier_cell.0][frontier_cell.1].remove_wall(2);
-            maze.grid[frontier_cell.0 + 1][frontier_cell.1].remove_wall(0);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 2);
+            maze.remove_cell_wall(frontier_cell.0 + 1, frontier_cell.1, 0);
         }
         3 => {
-            maze.grid[frontier_cell.0][frontier_cell.1].remove_wall(3);
-            maze.grid[frontier_cell.0][frontier_cell.1 - 1].remove_wall(1);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 3);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1 - 1, 1);
         }
         _ => {}
     }
