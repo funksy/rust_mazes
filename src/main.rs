@@ -11,5 +11,4 @@ fn main() {
     let duration = start.elapsed();
 
     println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height, maze.width);
-    maze.show();
 }

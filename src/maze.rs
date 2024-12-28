@@ -25,8 +25,16 @@ impl Maze {
         }
     }
 
-    pub fn get_cell_ref(&self, col: usize, row: usize) -> &Cell {
-        &self.grid[row * self.height + col]
+    pub fn get_cell_ref(&self, row: usize, col: usize) -> &Cell {
+        &self.grid[row * self.width + col]
+    }
+
+    pub fn visit_cell(&mut self, row: usize, col: usize) {
+        self.grid[row * self.width + col].visit();
+    }
+
+    pub fn remove_cell_wall(&mut self,  row: usize, col: usize, wall: usize) {
+        self.grid[row * self.width + col].remove_wall(wall);
     }
 
     pub fn show(&self) {

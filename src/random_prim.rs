@@ -8,10 +8,7 @@ pub fn create_maze(maze: &mut Maze) {
 
     {
         let start: (usize, usize) = find_start(maze);
-        maze.grid[maze.width * start.0 + start.1].visit();
-
-        println!("should be visited...  {}", maze.get_cell_ref(start.0, start.1).visited);
-
+        maze.visit_cell(start.0, start.1);
         add_cells_to_frontier(&maze, (start.0, start.1), &mut frontier);
     }
 
@@ -19,7 +16,7 @@ pub fn create_maze(maze: &mut Maze) {
         let rand_frontier = rand_frontier(&mut frontier);
         let direction_of_rand_visited_neighbor: usize = choose_rand_neighbor(&maze, rand_frontier);
         remove_walls_between_cells(maze, rand_frontier, direction_of_rand_visited_neighbor);
-        maze.get_cell_ref(rand_frontier.0, rand_frontier.1).visit();
+        maze.visit_cell(rand_frontier.0, rand_frontier.1);
         add_cells_to_frontier(&maze, rand_frontier, &mut frontier);
     }
 }
@@ -70,59 +67,48 @@ fn choose_rand_neighbor(maze: &Maze, frontier_cell_coords: (usize, usize)) -> us
     let mut directions = [0, 1, 2, 3];
     directions.shuffle(&mut thread_rng());
 
-    println!("frontier cell coords.  row:{}, col:{}", frontier_cell_coords.0, frontier_cell_coords.1);
-    maze.show();
-
-    println!();
-    println!();
-
     for direction in directions {
         if direction == 0 && frontier_cell_coords.0 > 0 {
-            println!("direction is up and neighbor is in boundaries");
             if maze.get_cell_ref(frontier_cell_coords.0 - 1, frontier_cell_coords.1).visited {
                 return direction;
             }
         }
         if direction == 1 && frontier_cell_coords.1 < maze.width - 1 {
-            println!("direction is right and neighbor is in boundaries");
             if maze.get_cell_ref(frontier_cell_coords.0, frontier_cell_coords.1 + 1).visited {
                 return direction;
             }
         }
         if direction == 2 && frontier_cell_coords.0 < maze.height - 1 {
-            println!("direction is down and neighbor is in boundaries");
             if maze.get_cell_ref(frontier_cell_coords.0 + 1, frontier_cell_coords.1).visited {
                 return direction;
             }
         }
         if direction == 3 && frontier_cell_coords.1 > 0 {
-            println!("direction is left and neighbor is in boundaries");
             if maze.get_cell_ref(frontier_cell_coords.0, frontier_cell_coords.1 - 1).visited {
                 return direction;
             }
         }
     }
-    println!("shouldn't be here");
     0
 }
 
 fn remove_walls_between_cells(maze: &mut Maze, frontier_cell: (usize, usize), direction: usize) {
     match direction {
         0 => {
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1).remove_wall(0);
-            maze.get_cell_ref(frontier_cell.0 - 1, frontier_cell.1).remove_wall(2);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 0);
+            maze.remove_cell_wall(frontier_cell.0 - 1, frontier_cell.1, 2);
         }
         1 => {
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1).remove_wall(1);
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1 + 1).remove_wall(3);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 1);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1 + 1, 3);
         }
         2 => {
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1).remove_wall(2);
-            maze.get_cell_ref(frontier_cell.0 + 1, frontier_cell.1).remove_wall(0);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 2);
+            maze.remove_cell_wall(frontier_cell.0 + 1, frontier_cell.1, 0);
         }
         3 => {
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1).remove_wall(3);
-            maze.get_cell_ref(frontier_cell.0, frontier_cell.1 - 1).remove_wall(1);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1, 3);
+            maze.remove_cell_wall(frontier_cell.0, frontier_cell.1 - 1, 1);
         }
         _ => {}
     }
