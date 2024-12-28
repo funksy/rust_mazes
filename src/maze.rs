@@ -4,7 +4,7 @@ use crate::cell::Cell;
 pub struct Maze {
     pub height: usize,
     pub width: usize,
-    pub grid: Vec<Vec<Cell>>,
+    pub grid: Vec<Cell>,
 }
 
 impl Maze {
@@ -13,9 +13,8 @@ impl Maze {
 
         let mut grid = Vec::new();
         for y in 0..height {
-            grid.push(Vec::new());
             for x in 0..width {
-                grid[y].push(Cell::new(x, y));
+                grid.push(Cell::new(x, y));
             }
         }
 
@@ -26,10 +25,14 @@ impl Maze {
         }
     }
 
+    pub fn get_cell_ref(&self, col: usize, row: usize) -> &Cell {
+        &self.grid[row * self.height + col]
+    }
+
     pub fn show(&self) {
-        for line in 0..self.height {
-            for column in 0..self.width {
-                if self.grid[line][column].visited == false {
+        for row in 0..self.height {
+            for col in 0..self.width {
+                if self.get_cell_ref(col, row).visited == false {
                     print!("0");
                 } else {
                     print!("1");
