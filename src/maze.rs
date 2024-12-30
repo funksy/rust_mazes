@@ -9,9 +9,10 @@ pub struct Maze {
 
 impl Maze {
     pub fn new() -> Self {
-        let (height, width): (usize, usize) = Self::get_maze_dimensions();
-
         let mut grid = Vec::new();
+
+        let (height, width) = Self::get_maze_dimensions();
+
         for y in 0..height {
             for x in 0..width {
                 grid.push(Cell::new(x, y));

@@ -4,8 +4,8 @@ use rand::seq::SliceRandom;
 use crate::maze::Maze;
 
 pub fn create_maze(maze: &mut Maze) {
-    let mut frontier: IndexSet<(usize, usize)> = IndexSet::new();
 
+    let mut frontier: IndexSet<(usize, usize)> = IndexSet::new();
     {
         let start: (usize, usize) = find_start(maze);
         maze.visit_cell(start.0, start.1);
