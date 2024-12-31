@@ -5,6 +5,7 @@ pub struct Maze {
     pub height: usize,
     pub width: usize,
     pub grid: Vec<Cell>,
+    pub frame: String,
 }
 
 impl Maze {
@@ -23,6 +24,7 @@ impl Maze {
             height,
             width,
             grid,
+            frame: "".to_string()
         }
     }
 
@@ -34,20 +36,19 @@ impl Maze {
         self.grid[row * self.width + col].visit();
     }
 
-    pub fn remove_cell_wall(&mut self,  row: usize, col: usize, wall: usize) {
+    pub fn remove_cell_wall(&mut self,  row: usize, col: usize, wall: &str) {
         self.grid[row * self.width + col].remove_wall(wall);
     }
 
-    pub fn show(&self) {
-
+    fn update_frame(&mut self) {
         let mut top = "┏━".to_string();
         for col in 0..(self.width - 1) {
             top.push(if self.get_cell_ref(0, col).walls[1] {'┳'} else {'━'});
             top.push('━');
         }
         top.push('┓');
-        println!("\n{}", top);
 
+        let mut rows = Vec::new();
         for y in 0..(self.height - 1) {
             let mut row = if self.get_cell_ref(y, 0).walls[2] {
                 "┣━".to_string()
@@ -68,7 +69,7 @@ impl Maze {
             } else {
                 '┃'
             });
-            println!("{}", row);
+            rows.push(row);
         }
 
         let mut bot = "┗━".to_string();
@@ -77,7 +78,19 @@ impl Maze {
             bot.push('━');
         }
         bot.push('┛');
-        println!("{}\n", bot);
+
+        self.frame = top;
+        self.frame.push_str("\n");
+        for row in rows {
+            self.frame.push_str(&row);
+            self.frame.push_str("\n");
+        }
+        self.frame.push_str(&bot);
+    }
+
+    pub fn show(&mut self) {
+        self.update_frame();
+        println!("{}", self.frame);
     }
 
     fn get_inner_junction(&self, top_left_cell: &Cell, bottom_right_cell: &Cell) -> char {

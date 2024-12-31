@@ -20,7 +20,17 @@ impl Cell {
         self.visited = true;
     }
 
-    pub fn remove_wall(&mut self, dir: usize) {
+    fn remove_wall_by_int(&mut self, dir: usize) {
         self.walls[dir] = false;
+    }
+
+    pub fn remove_wall(&mut self, dir: &str) {
+        match dir {
+            "top" => self.remove_wall_by_int(0),
+            "right" => self.remove_wall_by_int(1),
+            "bottom" => self.remove_wall_by_int(2),
+            "left" => self.remove_wall_by_int(3),
+            _ => {},
+        }
     }
 }
