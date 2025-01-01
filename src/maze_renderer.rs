@@ -12,10 +12,12 @@ struct Wall {
     y2: i32
 }
 
-enum CellState {
+#[derive(Debug)]
+pub enum CellState {
     Unvisited,
     Frontier,
     Path,
+    Solution,
     Start,
     Finish,
 }
@@ -133,17 +135,30 @@ impl MazeRenderer {
     fn render_cell_group(&self) -> Group {
         let mut group = Group::new().set("id", "g_cell_body");
         for cell in &self.cells {
+            let color = match &cell.state {
+                CellState::Unvisited => "white",
+                CellState::Frontier => "white",
+                CellState::Path=> "white",
+                CellState::Solution=> "blue",
+                CellState::Start=> "green",
+                CellState::Finish=> "red",
+            };
+
             let rectangle = Rectangle::new()
                 .set("x", cell.x * CELL_SIZE)
                 .set("y", cell.y * CELL_SIZE)
                 .set("width", CELL_SIZE)
                 .set("height", CELL_SIZE)
-                .set("fill", "white")
-                .set("stroke", "white")
+                .set("fill", color)
+                .set("stroke", color)
                 .set("stroke-width", "0.1%");
             group = group.add(rectangle);
         }
         group
+    }
+
+    pub fn update_cell_state(&mut self, cell_y: usize, cell_x: usize, new_state: CellState) {
+        self.cells[cell_y * self.maze_width as usize + cell_x].state = new_state;
     }
 
     pub fn generate_document(&self) -> Document {
