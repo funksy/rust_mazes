@@ -14,9 +14,9 @@ struct Wall {
 
 #[derive(Debug)]
 pub enum CellState {
-    Unvisited,
+    Normal,
     Frontier,
-    Path,
+    Explored,
     Solution,
     Start,
     Finish,
@@ -62,7 +62,7 @@ impl MazeRenderer {
             let x = cell.x as i32;
             let y = cell.y as i32;
 
-            cells.push(Cell { x, y, state: CellState::Unvisited });
+            cells.push(Cell { x, y, state: CellState::Normal });
 
             let top_wall = Wall {
                 x1: x * CELL_SIZE,
@@ -136,9 +136,9 @@ impl MazeRenderer {
         let mut group = Group::new().set("id", "g_cell_body");
         for cell in &self.cells {
             let color = match &cell.state {
-                CellState::Unvisited => "white",
-                CellState::Frontier => "white",
-                CellState::Path=> "white",
+                CellState::Normal => "white",
+                CellState::Frontier => "yellow",
+                CellState::Explored=> "orange",
                 CellState::Solution=> "blue",
                 CellState::Start=> "green",
                 CellState::Finish=> "red",
