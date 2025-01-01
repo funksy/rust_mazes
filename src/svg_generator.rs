@@ -8,6 +8,7 @@ use crate::maze::Maze;
 
 pub fn generate_svg(maze: &Maze) {
     let scale = 100;
+    let stroke_width = scale / 10;
 
     let y_size: i32 = maze.height as i32 * scale;
     let x_size: i32 = maze.width as i32 * scale;
@@ -23,7 +24,7 @@ pub fn generate_svg(maze: &Maze) {
     let outer_border_path = Path::new()
         .set("fill", "none")
         .set("stroke", "black")
-        .set("stroke-width", 10)
+        .set("stroke-width", stroke_width)
         .set("d", outer_border_data);
 
     let mut cell_walls = HashSet::new();
@@ -33,10 +34,10 @@ pub fn generate_svg(maze: &Maze) {
         let y = cell.y as i32 * scale + scale;
 
         if cell.walls[0] {
-            cell_walls.insert(((x, y), (x + scale, y)));
+            cell_walls.insert(((x - stroke_width / 2, y), (x + scale + stroke_width / 2, y)));
         }
         if cell.walls[1] {
-            cell_walls.insert(((x + scale, y), (x + scale, y + scale)));
+            cell_walls.insert(((x + scale, y - stroke_width / 2), (x + scale, y + scale + stroke_width / 2)));
         }
     }
 
@@ -48,7 +49,7 @@ pub fn generate_svg(maze: &Maze) {
     let cell_wall_path = Path::new()
         .set("fill", "none")
         .set("stroke", "black")
-        .set("stroke-width", 10)
+        .set("stroke-width", stroke_width)
         .set("d", cell_wall_data);
 
     let document = Document::new()
