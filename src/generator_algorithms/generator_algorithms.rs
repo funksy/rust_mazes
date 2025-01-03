@@ -1,6 +1,7 @@
 use rand::{thread_rng, Rng};
 
-use crate::maze::{Maze, Coord};
+use crate::maze::Maze;
+use crate::cell::Coord;
 
 pub mod random_prim;
 pub mod recursive_backtracker;
@@ -11,8 +12,8 @@ pub trait GeneratorAlgorithm {
 
 //chooses a random cell within the Maze
 pub fn random_grid_position (maze: &Maze) -> Coord {
-    let y = thread_rng().gen_range(0..maze.height);
-    let x = thread_rng().gen_range(0..maze.width);
+    let y = thread_rng().gen_range(0..maze.height());
+    let x = thread_rng().gen_range(0..maze.width());
     Coord {
         y,
         x,

@@ -2,7 +2,8 @@ use std::collections::HashSet;
 
 use svg::Document;
 use svg::node::element::{Group, Line, Rectangle};
-use crate::maze::{Maze, Coord};
+use crate::maze::Maze;
+use crate::cell::Coord;
 
 #[derive(Hash, Eq, PartialEq)]
 struct Wall {
@@ -46,21 +47,21 @@ impl MazeRenderer {
             x1: 0,
             y1: 0,
             x2: 0,
-            y2: maze.height as i32 * CELL_SIZE
+            y2: maze.height() as i32 * CELL_SIZE
         };
         walls.insert(left_border);
 
         let bottom_border = Wall {
             x1: 0,
-            y1: maze.height as i32 * CELL_SIZE,
-            x2: maze.width as i32 * CELL_SIZE,
-            y2: maze.height as i32 * CELL_SIZE
+            y1: maze.height() as i32 * CELL_SIZE,
+            x2: maze.width() as i32 * CELL_SIZE,
+            y2: maze.height() as i32 * CELL_SIZE
         };
         walls.insert(bottom_border);
 
-        for cell in &maze.grid {
-            let x = cell.x as i32;
-            let y = cell.y as i32;
+        for cell in maze.grid() {
+            let x = cell.coord().x as i32;
+            let y = cell.coord().y as i32;
 
             cells.push(Cell { x, y, state: CellState::Normal });
 
@@ -84,17 +85,17 @@ impl MazeRenderer {
         MazeRenderer {
             cells,
             walls,
-            maze_width: maze.width as i32,
-            maze_height: maze.height as i32,
+            maze_width: maze.width() as i32,
+            maze_height: maze.height() as i32,
         }
     }
 
     pub fn update_walls(&mut self, maze: &Maze) {
-        for cell in &maze.grid {
-            let x = cell.x as i32;
-            let y = cell.y as i32;
+        for cell in maze.grid() {
+            let x = cell.coord().x as i32;
+            let y = cell.coord().y as i32;
 
-            if !cell.walls[0] {
+            if !cell.walls()[0] {
                 let top_wall = Wall {
                     x1: x * CELL_SIZE,
                     y1: y * CELL_SIZE,
@@ -104,7 +105,7 @@ impl MazeRenderer {
                 self.walls.remove(&top_wall);
             }
 
-            if !cell.walls[1] {
+            if !cell.walls()[1] {
                 let right_wall = Wall {
                     x1: x * CELL_SIZE + CELL_SIZE,
                     y1: y * CELL_SIZE,

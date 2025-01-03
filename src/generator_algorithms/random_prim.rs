@@ -3,7 +3,8 @@ use rand::seq::SliceRandom;
 
 use indexmap::IndexSet;
 
-use crate::maze::{Maze, Coord};
+use crate::maze::Maze;
+use crate::cell::Coord;
 use crate::generator_algorithms::{random_grid_position, remove_walls_between_cells};
 
 //apply Prim's algorithm to an initialized Maze
@@ -33,22 +34,22 @@ fn add_cells_to_frontier(maze: &Maze, origin: &Coord, frontier: &mut IndexSet<Co
     let mut new_frontier_cells: Vec<Coord> = Vec::new();
 
     if origin.y > 0 {
-        if maze.get_cell_ref(&Coord{ y: origin.y - 1, x: origin.x }).visited == false {
+        if maze.get_cell_ref(&Coord{ y: origin.y - 1, x: origin.x }).visited() == false {
             new_frontier_cells.push(Coord{ y: origin.y - 1, x: origin.x })
         }
     }
-    if origin.y < maze.height - 1 {
-        if maze.get_cell_ref(&Coord{ y: origin.y + 1, x: origin.x }).visited == false {
+    if origin.y < maze.height() - 1 {
+        if maze.get_cell_ref(&Coord{ y: origin.y + 1, x: origin.x }).visited() == false {
             new_frontier_cells.push(Coord{ y: origin.y + 1, x: origin.x });
         }
     }
     if origin.x > 0 {
-        if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x - 1 }).visited == false {
+        if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x - 1 }).visited() == false {
             new_frontier_cells.push(Coord{ y: origin.y, x: origin.x - 1 });
         }
     }
-    if origin.x < maze.width - 1 {
-        if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x + 1 }).visited == false {
+    if origin.x < maze.width() - 1 {
+        if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x + 1 }).visited() == false {
             new_frontier_cells.push(Coord{ y: origin.y, x: origin.x + 1 });
         }
     }
@@ -70,22 +71,22 @@ fn choose_rand_neighbor(maze: &Maze, frontier_cell: &Coord) -> usize {
 
     for direction in directions {
         if direction == 0 && frontier_cell.y > 0 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y - 1, x: frontier_cell.x }).visited {
+            if maze.get_cell_ref(&Coord{ y: frontier_cell.y - 1, x: frontier_cell.x }).visited() {
                 return direction;
             }
         }
-        if direction == 1 && frontier_cell.x < maze.width - 1 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x + 1 }).visited {
+        if direction == 1 && frontier_cell.x < maze.width() - 1 {
+            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x + 1 }).visited() {
                 return direction;
             }
         }
-        if direction == 2 && frontier_cell.y < maze.height - 1 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y + 1, x: frontier_cell.x }).visited {
+        if direction == 2 && frontier_cell.y < maze.height() - 1 {
+            if maze.get_cell_ref(&Coord{ y: frontier_cell.y + 1, x: frontier_cell.x }).visited() {
                 return direction;
             }
         }
         if direction == 3 && frontier_cell.x > 0 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x - 1 }).visited {
+            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x - 1 }).visited() {
                 return direction;
             }
         }
