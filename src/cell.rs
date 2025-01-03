@@ -1,19 +1,35 @@
 #[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub struct Cell {
-    pub visited: bool,
-    pub walls: [bool; 4],
-    pub x: usize,
+    visited: bool,
+    walls: [bool; 4],
+    coord: Coord,
+}
+
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+pub struct Coord {
     pub y: usize,
+    pub x: usize
 }
 
 impl Cell {
-    pub fn new(x: usize, y: usize) -> Self {
-        Cell {
+    pub fn new(coord: Coord) -> Self {
+        Self {
             visited: false,
             walls: [true, true, true, true],
-            x,
-            y,
+            coord,
         }
+    }
+
+    pub fn walls(&self) -> &[bool; 4] {
+        &self.walls
+    }
+
+    pub fn coord(&self) -> &Coord {
+        &self.coord
+    }
+
+    pub fn visited(&self) -> bool {
+        self.visited
     }
 
     pub fn visit(&mut self) {

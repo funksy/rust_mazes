@@ -1,17 +1,11 @@
 use std::io::{self, Write};
-use crate::cell::Cell;
+use crate::cell::{Cell, Coord};
 
 pub struct Maze {
-    pub height: usize,
-    pub width: usize,
-    pub grid: Vec<Cell>,
+    height: usize,
+    width: usize,
+    grid: Vec<Cell>,
     pub frame: String,
-}
-
-#[derive(Eq, PartialEq, Hash, Clone, Copy)]
-pub struct Coord {
-    pub y: usize,
-    pub x: usize
 }
 
 impl Maze {
@@ -22,16 +16,28 @@ impl Maze {
 
         for y in 0..height {
             for x in 0..width {
-                grid.push(Cell::new(x, y));
+                grid.push(Cell::new(Coord{ y, x }));
             }
         }
 
-        Maze {
+        Self {
             height,
             width,
             grid,
             frame: "".to_string()
         }
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn grid(&self) -> &Vec<Cell> {
+        &self.grid
     }
 
     pub fn get_cell_ref(&self, coord: &Coord) -> &Cell {
@@ -49,14 +55,14 @@ impl Maze {
     fn update_frame(&mut self) {
         let mut top = "┏━".to_string();
         for x in 0..(self.width - 1) {
-            top.push(if self.get_cell_ref(&Coord{ y: 0, x }).walls[1] {'┳'} else {'━'});
+            top.push(if self.get_cell_ref(&Coord{ y: 0, x }).walls()[1] {'┳'} else {'━'});
             top.push('━');
         }
         top.push('┓');
 
         let mut rows = Vec::new();
         for y in 0..(self.height - 1) {
-            let mut row = if self.get_cell_ref(&Coord{ y, x: 0 }).walls[2] {
+            let mut row = if self.get_cell_ref(&Coord{ y, x: 0 }).walls()[2] {
                 "┣━".to_string()
             } else {
                 "┃ ".to_string()
@@ -68,9 +74,9 @@ impl Maze {
                         self.get_cell_ref(&Coord{ y: y + 1, x }),
                     )
                 );
-                row.push(if self.get_cell_ref(&Coord{ y, x }).walls[2] {'━'} else {' '});
+                row.push(if self.get_cell_ref(&Coord{ y, x }).walls()[2] {'━'} else {' '});
             }
-            row.push(if self.get_cell_ref(&Coord{ y, x: self.width - 1 }).walls[2] {
+            row.push(if self.get_cell_ref(&Coord{ y, x: self.width - 1 }).walls()[2] {
                 '┫'
             } else {
                 '┃'
@@ -80,7 +86,7 @@ impl Maze {
 
         let mut bot = "┗━".to_string();
         for x in 0..(self.width - 1) {
-            bot.push(if self.get_cell_ref(&Coord{ y: self.height - 1, x }).walls[1] {'┻'} else {'━'});
+            bot.push(if self.get_cell_ref(&Coord{ y: self.height - 1, x }).walls()[1] {'┻'} else {'━'});
             bot.push('━');
         }
         bot.push('┛');
@@ -101,8 +107,8 @@ impl Maze {
 
     fn get_inner_junction(&self, top_left_cell: &Cell, bottom_right_cell: &Cell) -> char {
         let lookup: i8 =
-            ((top_left_cell.walls[2] as i8) << 3 | (top_left_cell.walls[1] as i8) << 1) |
-            ((bottom_right_cell.walls[0] as i8) << 2 | (bottom_right_cell.walls[3] as i8));
+            ((top_left_cell.walls()[2] as i8) << 3 | (top_left_cell.walls()[1] as i8) << 1) |
+            ((bottom_right_cell.walls()[0] as i8) << 2 | (bottom_right_cell.walls()[3] as i8));
 
         [' ', '╻', '╹', '┃', '╺', '┏', '┗', '┣',
             '╸', '┓', '┛', '┫', '━', '┳', '┻', '╋'][lookup as usize]

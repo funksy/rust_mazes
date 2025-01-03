@@ -1,6 +1,7 @@
 use std::time::{Instant};
 
-use maze_generator::maze::{Maze, Coord};
+use maze_generator::maze::Maze;
+use maze_generator::cell::Coord;
 use maze_generator::maze_renderer::MazeRenderer;
 
 use maze_generator::generator_algorithms::{random_prim, recursive_backtracker };
@@ -12,7 +13,7 @@ fn main() {
     let start = Instant::now();
     recursive_backtracker::create_maze(&mut maze);
     let duration = start.elapsed();
-    println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height, maze.width);
+    println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height(), maze.width());
 
     let start = Instant::now();
     let mut renderer = MazeRenderer::new(&maze);
@@ -23,7 +24,7 @@ fn main() {
     println!("It took {:?} to complete the svg render", duration);
 
     let start = Instant::now();
-    breadth_first_search::find_solution(&maze, &Coord{ y: 0, x: 0 }, &Coord{ y: maze.height - 1, x: maze.width - 1 }, &mut renderer);
+    breadth_first_search::find_solution(&maze, &Coord{ y: 0, x: 0 }, &Coord{ y: maze.height() - 1, x: maze.width() - 1 }, &mut renderer);
     let duration = start.elapsed();
     println!("It took {:?} to find a solution for the maze", duration);
 
