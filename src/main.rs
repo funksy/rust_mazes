@@ -1,6 +1,6 @@
 use std::time::{Instant};
 
-use maze_generator::maze::Maze;
+use maze_generator::maze::{Maze, Coord};
 use maze_generator::maze_renderer::MazeRenderer;
 
 use maze_generator::generator_algorithms::{random_prim, recursive_backtracker };
@@ -23,7 +23,7 @@ fn main() {
     println!("It took {:?} to complete the svg render", duration);
 
     let start = Instant::now();
-    breadth_first_search::find_solution(&maze, (0, 0), (maze.height - 1, maze.width - 1), &mut renderer);
+    breadth_first_search::find_solution(&maze, &Coord{ y: 0, x: 0 }, &Coord{ y: maze.height - 1, x: maze.width - 1 }, &mut renderer);
     let duration = start.elapsed();
     println!("It took {:?} to find a solution for the maze", duration);
 

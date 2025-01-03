@@ -1,52 +1,52 @@
 use std::collections::{HashMap, VecDeque};
 
-use crate::maze::Maze;
+use crate::maze::{Maze, Coord};
 use crate::maze_renderer::{MazeRenderer, CellState};
 
-pub fn find_solution(maze: &Maze, (start_y, start_x): (usize, usize), (finish_y, finish_x): (usize, usize), renderer: &mut MazeRenderer) {
-    let mut frontier: VecDeque<(usize, usize)> = VecDeque::new();
-    let mut explored: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
+pub fn find_solution(maze: &Maze, start: &Coord, finish: &Coord, renderer: &mut MazeRenderer) {
+    let mut frontier: VecDeque<Coord> = VecDeque::new();
+    let mut explored: HashMap<Coord, Coord> = HashMap::new();
 
-    frontier.push_back((start_y, start_x));
+    frontier.push_back(start.clone());
 
-    while !explored.contains_key(&(finish_y, finish_x)) {
-        let (current_cell_y, current_cell_x) = frontier.pop_front().unwrap();
+    while !explored.contains_key(&finish) {
+        let current_cell = frontier.pop_front().unwrap();
 
         // renderer.update_cell_state(current_cell_y, current_cell_x, CellState::Explored);
 
-        add_adjacent_cells(&maze, &mut explored, &mut frontier, (current_cell_y, current_cell_x), renderer);
+        add_adjacent_cells(&maze, &mut explored, &mut frontier, &current_cell, renderer);
     }
 
-    renderer.update_cell_state(start_y, start_x, CellState::Start);
-    renderer.update_cell_state(finish_y, finish_x, CellState::Finish);
+    renderer.update_cell_state(start, CellState::Start);
+    renderer.update_cell_state(finish, CellState::Finish);
 
-    let (mut solution_cell_y, mut solution_cell_x) = *explored.get(&(finish_y, finish_x)).unwrap();
-    while (solution_cell_y, solution_cell_x) != (start_y, start_x) {
-        renderer.update_cell_state(solution_cell_y, solution_cell_x, CellState::Solution);
-        (solution_cell_y, solution_cell_x) = *explored.get(&(solution_cell_y, solution_cell_x)).unwrap();
+    let mut solution_cell = *explored.get(&finish).unwrap();
+    while solution_cell != *start {
+        renderer.update_cell_state(&solution_cell, CellState::Solution);
+        solution_cell = *explored.get(&solution_cell).unwrap();
     }
 }
 
-fn add_adjacent_cells(maze: &Maze, explored: &mut HashMap<(usize, usize), (usize, usize)>, frontier: &mut VecDeque<(usize, usize)>,(cell_y, cell_x): (usize, usize), renderer: &mut MazeRenderer) {
-    let cell = maze.get_cell_ref(cell_y, cell_x);
-    if !cell.walls[0] && !explored.contains_key(&(cell_y - 1, cell_x)) {
-        explored.insert((cell_y - 1, cell_x),(cell_y, cell_x));
-        frontier.push_back((cell_y - 1, cell_x));
+fn add_adjacent_cells(maze: &Maze, explored: &mut HashMap<Coord, Coord>, frontier: &mut VecDeque<Coord>, current_cell: &Coord, renderer: &mut MazeRenderer) {
+    let cell = maze.get_cell_ref(current_cell);
+    if !cell.walls[0] && !explored.contains_key(&Coord{ y: cell.y - 1, x: cell.x }) {
+        explored.insert(Coord{ y: cell.y - 1, x: cell.x }, current_cell.clone());
+        frontier.push_back(Coord{ y: cell.y - 1, x: cell.x });
         // renderer.update_cell_state(cell_y - 1, cell_x, CellState::Frontier);
     }
-    if !cell.walls[1] && !explored.contains_key(&(cell_y, cell_x + 1)) {
-        explored.insert((cell_y, cell_x + 1),(cell_y, cell_x));
-        frontier.push_back((cell_y, cell_x + 1));
+    if !cell.walls[1] && !explored.contains_key(&Coord{ y: cell.y, x: cell.x + 1 }) {
+        explored.insert(Coord{ y: cell.y, x: cell.x + 1 }, current_cell.clone());
+        frontier.push_back(Coord{ y: cell.y, x: cell.x + 1 });
         // renderer.update_cell_state(cell_y , cell_x + 1, CellState::Frontier);
     }
-    if !cell.walls[2] && !explored.contains_key(&(cell_y + 1, cell_x)) {
-        explored.insert((cell_y + 1, cell_x),(cell_y, cell_x));
-        frontier.push_back((cell_y + 1, cell_x));
+    if !cell.walls[2] && !explored.contains_key(&Coord{ y: cell.y + 1, x: cell.x }) {
+        explored.insert(Coord{ y: cell.y + 1, x: cell.x }, current_cell.clone());
+        frontier.push_back(Coord{ y: cell.y + 1, x: cell.x });
         // renderer.update_cell_state(cell_y + 1, cell_x, CellState::Frontier);
     }
-    if !cell.walls[3] && !explored.contains_key(&(cell_y, cell_x - 1)) {
-        explored.insert((cell_y, cell_x - 1),(cell_y, cell_x));
-        frontier.push_back((cell_y, cell_x - 1));
+    if !cell.walls[3] && !explored.contains_key(&Coord{ y: cell.y, x: cell.x - 1 }) {
+        explored.insert(Coord{ y: cell.y, x: cell.x - 1 }, current_cell.clone());
+        frontier.push_back(Coord{ y: cell.y, x: cell.x - 1 });
         // renderer.update_cell_state(cell_y, cell_x - 1, CellState::Frontier);
     }
 }
