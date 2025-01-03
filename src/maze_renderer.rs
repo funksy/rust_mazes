@@ -139,7 +139,7 @@ impl MazeRenderer {
                 CellState::Normal => "white",
                 CellState::Frontier => "yellow",
                 CellState::Explored=> "orange",
-                CellState::Solution=> "blue",
+                CellState::Solution=> "lightcoral",
                 CellState::Start=> "green",
                 CellState::Finish=> "red",
             };
