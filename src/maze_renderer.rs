@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use svg::Document;
 use svg::node::element::{Group, Line, Rectangle};
-use crate::maze::Maze;
+use crate::maze::{Maze, Coord};
 
 #[derive(Hash, Eq, PartialEq)]
 struct Wall {
@@ -157,8 +157,8 @@ impl MazeRenderer {
         group
     }
 
-    pub fn update_cell_state(&mut self, cell_y: usize, cell_x: usize, new_state: CellState) {
-        self.cells[cell_y * self.maze_width as usize + cell_x].state = new_state;
+    pub fn update_cell_state(&mut self, cell: &Coord, new_state: CellState) {
+        self.cells[cell.y * self.maze_width as usize + cell.x].state = new_state;
     }
 
     pub fn generate_document(&self) -> Document {

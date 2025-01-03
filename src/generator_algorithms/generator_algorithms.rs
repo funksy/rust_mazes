@@ -1,6 +1,6 @@
 use rand::{thread_rng, Rng};
 
-use crate::maze::Maze;
+use crate::maze::{Maze, Coord};
 
 pub mod random_prim;
 pub mod recursive_backtracker;
@@ -10,30 +10,33 @@ pub trait GeneratorAlgorithm {
 }
 
 //chooses a random cell within the Maze
-pub fn random_grid_position (maze: &Maze) -> (usize, usize) {
-    let start_row = thread_rng().gen_range(0..maze.height);
-    let start_col = thread_rng().gen_range(0..maze.width);
-    (start_row, start_col)
+pub fn random_grid_position (maze: &Maze) -> Coord {
+    let y = thread_rng().gen_range(0..maze.height);
+    let x = thread_rng().gen_range(0..maze.width);
+    Coord {
+        y,
+        x,
+    }
 }
 
 //removes the common wall between the indicated cell and the one in the indicated direction from that cell
-pub fn remove_walls_between_cells(maze: &mut Maze, (frontier_cell_y, frontier_cell_x): (usize, usize), direction: usize) {
+pub fn remove_walls_between_cells(maze: &mut Maze, frontier_cell: &Coord, direction: usize) {
     match direction {
         0 => {
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x, "top");
-            maze.remove_cell_wall(frontier_cell_y - 1, frontier_cell_x, "bottom");
+            maze.remove_cell_wall(frontier_cell, "top");
+            maze.remove_cell_wall(&Coord{ y: frontier_cell.y - 1, x: frontier_cell.x }, "bottom");
         }
         1 => {
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x, "right");
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x + 1, "left");
+            maze.remove_cell_wall(frontier_cell, "right");
+            maze.remove_cell_wall(&Coord{ y: frontier_cell.y, x: frontier_cell.x + 1 }, "left");
         }
         2 => {
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x, "bottom");
-            maze.remove_cell_wall(frontier_cell_y + 1, frontier_cell_x, "top");
+            maze.remove_cell_wall(frontier_cell, "bottom");
+            maze.remove_cell_wall(&Coord{ y: frontier_cell.y + 1, x: frontier_cell.x }, "top");
         }
         3 => {
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x, "left");
-            maze.remove_cell_wall(frontier_cell_y, frontier_cell_x - 1, "right");
+            maze.remove_cell_wall(frontier_cell, "left");
+            maze.remove_cell_wall(&Coord{ y: frontier_cell.y, x: frontier_cell.x - 1 }, "right");
         }
         _ => {}
     }

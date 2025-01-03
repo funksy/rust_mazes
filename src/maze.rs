@@ -8,6 +8,12 @@ pub struct Maze {
     pub frame: String,
 }
 
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+pub struct Coord {
+    pub y: usize,
+    pub x: usize
+}
+
 impl Maze {
     pub fn new() -> Self {
         let mut grid = Vec::new();
@@ -28,29 +34,29 @@ impl Maze {
         }
     }
 
-    pub fn get_cell_ref(&self, row: usize, col: usize) -> &Cell {
-        &self.grid[row * self.width + col]
+    pub fn get_cell_ref(&self, coord: &Coord) -> &Cell {
+        &self.grid[coord.y * self.width + coord.x]
     }
 
-    pub fn visit_cell(&mut self, row: usize, col: usize) {
-        self.grid[row * self.width + col].visit();
+    pub fn visit_cell(&mut self, coord: &Coord) {
+        self.grid[coord.y * self.width + coord.x].visit();
     }
 
-    pub fn remove_cell_wall(&mut self,  row: usize, col: usize, wall: &str) {
-        self.grid[row * self.width + col].remove_wall(wall);
+    pub fn remove_cell_wall(&mut self, coord: &Coord, wall: &str) {
+        self.grid[coord.y * self.width + coord.x].remove_wall(wall);
     }
 
     fn update_frame(&mut self) {
         let mut top = "┏━".to_string();
-        for col in 0..(self.width - 1) {
-            top.push(if self.get_cell_ref(0, col).walls[1] {'┳'} else {'━'});
+        for x in 0..(self.width - 1) {
+            top.push(if self.get_cell_ref(&Coord{ y: 0, x }).walls[1] {'┳'} else {'━'});
             top.push('━');
         }
         top.push('┓');
 
         let mut rows = Vec::new();
         for y in 0..(self.height - 1) {
-            let mut row = if self.get_cell_ref(y, 0).walls[2] {
+            let mut row = if self.get_cell_ref(&Coord{ y, x: 0 }).walls[2] {
                 "┣━".to_string()
             } else {
                 "┃ ".to_string()
@@ -58,13 +64,13 @@ impl Maze {
             for x in 1..self.width {
                 row.push(
                     self.get_inner_junction(
-                        self.get_cell_ref(y, x - 1),
-                        self.get_cell_ref(y + 1, x),
+                        self.get_cell_ref(&Coord{ y, x: x - 1 }),
+                        self.get_cell_ref(&Coord{ y: y + 1, x }),
                     )
                 );
-                row.push(if self.get_cell_ref(y, x).walls[2] {'━'} else {' '});
+                row.push(if self.get_cell_ref(&Coord{ y, x }).walls[2] {'━'} else {' '});
             }
-            row.push(if self.get_cell_ref(y, self.width - 1).walls[2] {
+            row.push(if self.get_cell_ref(&Coord{ y, x: self.width - 1 }).walls[2] {
                 '┫'
             } else {
                 '┃'
@@ -73,8 +79,8 @@ impl Maze {
         }
 
         let mut bot = "┗━".to_string();
-        for col in 0..(self.width - 1) {
-            bot.push(if self.get_cell_ref(self.height - 1, col).walls[1] {'┻'} else {'━'});
+        for x in 0..(self.width - 1) {
+            bot.push(if self.get_cell_ref(&Coord{ y: self.height - 1, x }).walls[1] {'┻'} else {'━'});
             bot.push('━');
         }
         bot.push('┛');
