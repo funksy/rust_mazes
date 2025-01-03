@@ -11,11 +11,11 @@ pub trait GeneratorAlgorithm {
 
 //chooses a random cell within the Maze
 pub fn random_grid_position (maze: &Maze) -> Coord {
-    let start_row = thread_rng().gen_range(0..maze.height);
-    let start_col = thread_rng().gen_range(0..maze.width);
+    let y = thread_rng().gen_range(0..maze.height);
+    let x = thread_rng().gen_range(0..maze.width);
     Coord {
-        y: start_row,
-        x: start_col
+        y,
+        x,
     }
 }
 
