@@ -4,7 +4,7 @@ use maze_generator::maze::Maze;
 use maze_generator::cell::Coord;
 use maze_generator::maze_renderer::MazeRenderer;
 
-use maze_generator::generator_algorithms::{random_prim, recursive_backtracker };
+use maze_generator::generator_algorithms::{ random_prim, recursive_backtracker };
 use maze_generator::solver_algorithms::{ breadth_first_search };
 
 fn main() {

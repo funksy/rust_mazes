@@ -5,7 +5,7 @@ use indexmap::IndexSet;
 
 use crate::maze::Maze;
 use crate::cell::Coord;
-use crate::generator_algorithms::{random_grid_position, remove_walls_between_cells};
+use crate::generator_algorithms::generator_helpers::{random_grid_position, remove_walls_between_cells};
 
 //apply Prim's algorithm to an initialized Maze
 pub fn create_maze(maze: &mut Maze) {

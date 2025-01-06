@@ -3,9 +3,6 @@ use rand::{thread_rng, Rng};
 use crate::maze::Maze;
 use crate::cell::Coord;
 
-pub mod random_prim;
-pub mod recursive_backtracker;
-
 pub trait GeneratorAlgorithm {
     fn create_maze(maze: &mut Maze);
 }
