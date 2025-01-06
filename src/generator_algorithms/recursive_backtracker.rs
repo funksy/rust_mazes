@@ -3,7 +3,7 @@ use rand::seq::SliceRandom;
 
 use crate::maze::Maze;
 use crate::cell::Coord;
-use crate::generator_algorithms::{random_grid_position, remove_walls_between_cells};
+use crate::generator_algorithms::generator_helpers::{random_grid_position, remove_walls_between_cells};
 
 const DIR_X: [isize; 4] = [0, 1, 0, -1];
 const DIR_Y: [isize; 4] = [-1, 0, 1, 0];
