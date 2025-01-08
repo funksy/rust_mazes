@@ -1,3 +1,4 @@
+use dioxus::prelude::Signal;
 use rand::{thread_rng, Rng};
 
 use crate::maze::Maze;

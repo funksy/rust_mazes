@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-use crate::cell::{Cell, Coord};
+use crate::cell::{Cell, CellState, Coord};
 
 pub struct Maze {
     height: usize,
@@ -9,10 +9,10 @@ pub struct Maze {
 }
 
 impl Maze {
-    pub fn new() -> Self {
+    pub fn new(height: usize, width: usize) -> Self {
         let mut grid = Vec::new();
 
-        let (height, width) = Self::get_maze_dimensions();
+        // let (height, width) = Self::get_maze_dimensions();
 
         for y in 0..height {
             for x in 0..width {
@@ -50,6 +50,10 @@ impl Maze {
 
     pub fn remove_cell_wall(&mut self, coord: &Coord, wall: &str) {
         self.grid[coord.y * self.width + coord.x].remove_wall(wall);
+    }
+
+    pub fn change_cell_state(&mut self, coord: &Coord, new_state: CellState) {
+        self.grid[coord.y * self.width + coord.x].change_state(new_state);
     }
 
     fn update_frame(&mut self) {
