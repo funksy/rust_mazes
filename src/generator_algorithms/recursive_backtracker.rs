@@ -2,7 +2,7 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 
 use crate::maze::Maze;
-use crate::cell::Coord;
+use crate::cell::{CellState, Coord};
 use crate::generator_algorithms::generator_helpers::{random_grid_position, remove_walls_between_cells};
 
 const DIR_X: [isize; 4] = [0, 1, 0, -1];
@@ -14,7 +14,7 @@ pub fn create_maze(maze: &mut Maze) {
 }
 
 fn carve_passages_from(cell: &Coord, maze: &mut Maze) {
-    maze.visit_cell(cell);
+    maze.change_cell_state(cell, CellState::Path);
 
     let mut directions = [0, 1, 2, 3];
     directions.shuffle(&mut thread_rng());

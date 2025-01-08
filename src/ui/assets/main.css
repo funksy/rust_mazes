@@ -1,0 +1,26 @@
+body {
+    display: flex;
+    flex-flow: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+main {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: 100vh;
+    height: 100vh;
+}
+
+svg {
+    height: 65vh;
+    width: 65vh;
+}
+
+line {
+    stroke: black;
+    stroke-width: 0.5;
+    stroke-linecap: square;
+}

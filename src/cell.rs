@@ -1,6 +1,6 @@
 #[derive(Eq, PartialEq, Hash, Clone, Copy)]
 pub struct Cell {
-    visited: bool,
+    state: CellState,
     walls: [bool; 4],
     coord: Coord,
 }
@@ -11,10 +11,20 @@ pub struct Coord {
     pub x: usize
 }
 
+#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+pub enum CellState {
+    Unvisited,
+    Frontier,
+    Path,
+    Solution,
+    Start,
+    Finish,
+}
+
 impl Cell {
     pub fn new(coord: Coord) -> Self {
         Self {
-            visited: false,
+            state: CellState::Unvisited,
             walls: [true, true, true, true],
             coord,
         }
@@ -29,11 +39,22 @@ impl Cell {
     }
 
     pub fn visited(&self) -> bool {
-        self.visited
+        match self.state {
+            CellState::Path => true,
+            _ => false
+        }
     }
 
     pub fn visit(&mut self) {
-        self.visited = true;
+        self.state = CellState::Path;
+    }
+
+    pub fn change_state(&mut self, state: CellState) {
+        self.state = state;
+    }
+
+    pub fn state(&self) -> CellState {
+        self.state
     }
 
     fn remove_wall_by_int(&mut self, dir: usize) {
