@@ -1,3 +1,3 @@
 pub mod Header;
-pub mod Maze;
+pub mod MazeRender;
 pub mod Dropdown;

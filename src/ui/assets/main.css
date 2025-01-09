@@ -6,7 +6,7 @@ body {
     align-items: center;
 }
 
-main {
+#main {
     display: flex;
     flex-flow: column;
     align-items: center;
@@ -23,4 +23,18 @@ line {
     stroke: black;
     stroke-width: 0.5;
     stroke-linecap: square;
+}
+
+#dropdowns {
+    display: flex;
+    flex-flow: row;
+    width: 50%;
+    margin: 20px;
+    justify-content: space-around;
+}
+
+select {
+    width: 180px;
+    padding: 4px;
+    text-align: center;
 }

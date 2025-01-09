@@ -8,7 +8,6 @@ pub trait GeneratorAlgorithm {
     fn create_maze(maze: &mut Maze);
 }
 
-//chooses a random cell within the Maze
 pub fn random_grid_position (maze: &Maze) -> Coord {
     let y = thread_rng().gen_range(0..maze.height());
     let x = thread_rng().gen_range(0..maze.width());
@@ -18,7 +17,6 @@ pub fn random_grid_position (maze: &Maze) -> Coord {
     }
 }
 
-//removes the common wall between the indicated cell and the one in the indicated direction from that cell
 pub fn remove_walls_between_cells(maze: &mut Maze, frontier_cell: &Coord, direction: usize) {
     match direction {
         0 => {
