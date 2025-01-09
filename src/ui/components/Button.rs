@@ -2,13 +2,15 @@ use dioxus::prelude::*;
 
 #[derive(PartialEq, Props, Clone)]
 pub struct ButtonProps {
-
+    onclick: EventHandler<MouseEvent>,
+    button_text: String,
 }
 
-pub fn Button() -> Element {
+pub fn Button(props: ButtonProps) -> Element {
     rsx! {
         button {
-            "Generate maze"
+            onclick: move |evt| props.onclick.call(evt),
+            "{props.button_text}",
         }
     }
 }

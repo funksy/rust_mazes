@@ -13,12 +13,12 @@ struct Wall {
     y2: i32
 }
 
-const CELL_SIZE: i32 = 3;
-
 #[derive(PartialEq, Props, Clone)]
 pub struct MazeRenderProps {
     maze: Signal<Maze>,
 }
+
+const CELL_SIZE: i32 = 3;
 
 pub fn MazeRender(props: MazeRenderProps) -> Element {
     let walls = use_memo(move || generate_walls(&props.maze.read()));
@@ -35,7 +35,7 @@ pub fn MazeRender(props: MazeRenderProps) -> Element {
                         y: "{cell.coord().y as i32 * CELL_SIZE}",
                         width: "{CELL_SIZE}",
                         height: "{CELL_SIZE}",
-                        fill: "white"
+                        fill: "{get_cell_color(&cell.state())}"
                     }
                 }
             }
@@ -143,4 +143,15 @@ fn contains_wall(inside_wall: &Wall, containing_wall: &Wall) -> bool {
     let y_in_range = (inside_wall.y1 >= containing_wall.y1) && (inside_wall.y2 <= containing_wall.y2);
 
     return x_in_range && y_in_range
+}
+
+fn get_cell_color(cell_state: &CellState) -> String {
+    match cell_state {
+        CellState::Unvisited => "white".to_string(),
+        CellState::Path => "white".to_string(),
+        CellState::Frontier => "white".to_string(),
+        CellState::Solution => "pink".to_string(),
+        CellState::Start => "green".to_string(),
+        CellState::Finish => "red".to_string(),
+    }
 }
