@@ -4,7 +4,6 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::generator_algorithms::random_prim;
 
 #[derive(Hash, Eq, PartialEq, Clone)]
 struct Wall {
@@ -22,35 +21,30 @@ struct Cell {
 
 const CELL_SIZE: i32 = 3;
 
-// pub struct MazeProps {
-//     pub generator: String,
-//     pub solver: String,
-// }
+#[derive(PartialEq, Props, Clone)]
+pub struct MazeRenderProps {
+    maze: Signal<Maze>,
+}
 
-
-pub fn Maze() -> Element {
-    let mut maze = Maze::new(50, 50);
-    random_prim::create_maze(&mut maze);
-
-    let mut maze = use_signal(|| maze);
+pub fn MazeRender(props: MazeRenderProps) -> Element {
     let mut walls = HashSet::new();
 
-    for y in 0..=maze.read().height() {
+    for y in 0..=props.maze.read().height() {
         let horiz_wall = Wall {
             x1: 0,
             y1: y as i32 * CELL_SIZE,
-            x2: maze.read().width() as i32 * CELL_SIZE,
+            x2: props.maze.read().width() as i32 * CELL_SIZE,
             y2: y as i32 * CELL_SIZE,
         };
         walls.insert(horiz_wall);
     }
 
-    for x in 0..=maze.read().width() {
+    for x in 0..=props.maze.read().width() {
         let vert_wall = Wall{
             x1: x as i32 * CELL_SIZE,
             y1: 0,
             x2: x as i32 * CELL_SIZE,
-            y2: maze.read().height() as i32 * CELL_SIZE,
+            y2: props.maze.read().height() as i32 * CELL_SIZE,
         };
         walls.insert(vert_wall);
     }
@@ -58,7 +52,7 @@ pub fn Maze() -> Element {
     let mut walls = use_signal(|| walls);
 
     use_effect(move || {
-        for cell in maze.read().grid() {
+        for cell in props.maze.read().grid() {
             let x = cell.coord().x as i32;
             let y = cell.coord().y as i32;
 
@@ -86,13 +80,13 @@ pub fn Maze() -> Element {
 
     rsx! {
         svg {
-            view_box: "{-CELL_SIZE} {-CELL_SIZE} {maze.read().width() as i32 * CELL_SIZE + 2 * CELL_SIZE} {maze.read().height() as i32 * CELL_SIZE + 2 * CELL_SIZE}",
+            view_box: "{-CELL_SIZE} {-CELL_SIZE} {props.maze.read().width() as i32 * CELL_SIZE + 2 * CELL_SIZE} {props.maze.read().height() as i32 * CELL_SIZE + 2 * CELL_SIZE}",
 
             g {
                 id: "cells",
-                for cell in maze.read().grid() {
+                for cell in props.maze.read().grid() {
                     rect {
-                        id: "{cell.coord().y * maze.read().width() + cell.coord().x}",
+                        id: "{cell.coord().y * props.maze.read().width() + cell.coord().x}",
                         x: "{cell.coord().x as i32 * CELL_SIZE}",
                         y: "{cell.coord().y as i32 * CELL_SIZE}",
                         width: "{CELL_SIZE}",

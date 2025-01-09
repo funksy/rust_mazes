@@ -9,19 +9,14 @@ use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
 use crate::generator_algorithms::generator_helpers::{random_grid_position, remove_walls_between_cells};
 
-//apply Prim's algorithm to an initialized Maze
-pub fn create_maze(maze: &mut Maze) {
-    //indexSet is a hash that is indexable, allowing for quick lookup characteristics of a hash
-    //but still allowing for choosing one randomly using a random number generator
+pub fn create_maze(maze: &mut Signal<Maze>) {
+    let mut maze: &mut Maze = &mut maze.write();
     let mut frontier: IndexSet<Coord> = IndexSet::new();
 
-    //establish a starting cell, mark it as visited, and add it's adjacent cells to the frontier
-    let start: Coord = random_grid_position(maze);
+    let start: Coord = random_grid_position(&maze);
     maze.visit_cell(&start);
     add_cells_to_frontier(maze, &start, &mut frontier);
 
-    //main loop to continually apply the algorithm until no frontier cells are left
-    //which means all cells have been visited
     while frontier.len() > 0 {
         let rand_frontier = rand_frontier(&mut frontier);
         let direction_of_rand_visited_neighbor: usize = choose_rand_neighbor(maze, &rand_frontier);
@@ -31,7 +26,6 @@ pub fn create_maze(maze: &mut Maze) {
     }
 }
 
-//add appropriate adjacent cells to the frontier Vec
 fn add_cells_to_frontier(maze: &mut Maze, origin: &Coord, frontier: &mut IndexSet<Coord>) {
     let mut new_frontier_cells: Vec<Coord> = Vec::new();
 
@@ -65,13 +59,11 @@ fn add_cells_to_frontier(maze: &mut Maze, origin: &Coord, frontier: &mut IndexSe
     }
 }
 
-//chooses a random cell within the frontier
 fn rand_frontier (frontier: &mut IndexSet<Coord>) -> Coord {
     frontier.swap_remove_index(thread_rng().gen_range(0..frontier.len())).unwrap()
 }
 
-// chooses a random cell adjacent to the cell indicated, respecting the boundaries of the provided Maze
-fn choose_rand_neighbor(maze: &mut Maze, frontier_cell: &Coord) -> usize {
+fn choose_rand_neighbor(maze: &Maze, frontier_cell: &Coord) -> usize {
     let mut directions = [0, 1, 2, 3];
     directions.shuffle(&mut thread_rng());
 
