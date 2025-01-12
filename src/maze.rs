@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use dioxus::html::KeyCode::P;
 use crate::cell::{Cell, CellState, Coord};
 
 #[derive(PartialEq, Clone)]
@@ -11,7 +10,13 @@ pub struct SvgRect {
     pub fill: String,
 }
 
-#[derive(Hash, Eq, PartialEq, Clone, Copy)]
+#[derive(Debug)]
+enum WallDirection {
+    Vertical,
+    Horizontal,
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Copy, Debug)]
 pub struct SvgLine {
     pub x1: i32,
     pub y1: i32,
@@ -22,7 +27,8 @@ pub struct SvgLine {
 #[derive(PartialEq, Clone)]
 pub struct SvgRender {
     pub cells: Vec<SvgRect>,
-    pub walls: HashSet<SvgLine>,
+    pub vert_walls: Vec<HashSet<SvgLine>>,
+    pub horiz_walls: Vec<HashSet<SvgLine>>
 }
 
 pub struct Maze {
@@ -51,7 +57,7 @@ impl Maze {
             }
         }
 
-        let mut walls: HashSet<SvgLine> = HashSet::new();
+        let mut horiz_walls: Vec<HashSet<SvgLine>> = Vec::new();
         for y in 0..=height {
             let horiz_wall = SvgLine {
                 x1: 0,
@@ -59,8 +65,12 @@ impl Maze {
                 x2: width as i32 * CELL_SIZE,
                 y2: y as i32 * CELL_SIZE,
             };
-            walls.insert(horiz_wall);
+            let mut new_horiz_wall_set = HashSet::new();
+            new_horiz_wall_set.insert(horiz_wall);
+            horiz_walls.push(new_horiz_wall_set);
         }
+
+        let mut vert_walls: Vec<HashSet<SvgLine>> = Vec::new();
         for x in 0..=width {
             let vert_wall = SvgLine {
                 x1: x as i32 * CELL_SIZE,
@@ -68,7 +78,9 @@ impl Maze {
                 x2: x as i32 * CELL_SIZE,
                 y2: height as i32 * CELL_SIZE,
             };
-            walls.insert(vert_wall);
+            let mut new_vert_wall_set = HashSet::new();
+            new_vert_wall_set.insert(vert_wall);
+            vert_walls.push(new_vert_wall_set);
         }
 
         Self {
@@ -77,7 +89,8 @@ impl Maze {
             grid,
             svg: SvgRender {
                 cells,
-                walls,
+                horiz_walls,
+                vert_walls,
             }
         }
     }
@@ -123,10 +136,10 @@ impl Maze {
         }
     }
 
-    pub fn remove_cell_wall(&mut self, coord: &Coord, wall: &str) {
-        self.grid[coord.y * self.width + coord.x].remove_wall(wall);
+    pub fn remove_cell_wall(&mut self, coord: &Coord, wall_side: &str) {
+        self.grid[coord.y * self.width + coord.x].remove_wall(wall_side);
 
-        match wall {
+        match wall_side {
             "top" => {
                 let wall_to_remove = SvgLine {
                     x1: coord.x as i32 * CELL_SIZE,
@@ -135,9 +148,9 @@ impl Maze {
                     y2: coord.y as i32 * CELL_SIZE
                 };
 
-                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove);
-                self.svg.walls.remove(&containing_wall);
-                self.svg.walls.extend(&new_walls);
+                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove, WallDirection::Horizontal, coord);
+                self.svg.horiz_walls[coord.y].remove(&containing_wall);
+                self.svg.horiz_walls[coord.y].extend(&new_walls);
             },
             "right" => {
                 let wall_to_remove = SvgLine {
@@ -147,24 +160,29 @@ impl Maze {
                     y2: coord.y as i32 * CELL_SIZE + CELL_SIZE,
                 };
 
-                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove);
-                self.svg.walls.remove(&containing_wall);
-                self.svg.walls.extend(&new_walls);
+                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove, WallDirection::Vertical, coord);
+                self.svg.vert_walls[coord.x + 1].remove(&containing_wall);
+                self.svg.vert_walls[coord.x + 1].extend(&new_walls);
             },
             _ => {}
         }
     }
 
-    fn split_wall(&self, wall_to_remove: &SvgLine) -> (SvgLine, Vec<SvgLine>) {
-        let mut new_walls: Vec<SvgLine> = Vec::new();
+    fn split_wall(&self, wall_to_remove: &SvgLine, wall_direction: WallDirection, cell_coord: &Coord) -> (SvgLine, Vec<SvgLine>) {
+        let (walls_vec, walls_vec_i): (&Vec<HashSet<SvgLine>>, usize) = match wall_direction {
+            WallDirection::Vertical => (&self.svg.vert_walls, cell_coord.x + 1),
+            WallDirection::Horizontal => (&self.svg.horiz_walls, cell_coord.y),
+        };
 
-        let containing_wall = match self.svg.walls
+        let containing_wall = match walls_vec[walls_vec_i]
             .iter()
             .find(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
             .cloned() {
             Some(wall) => wall,
-            None => panic!("Containing wall doesn't exist"),
+            None => panic!("Containing wall doesn't exist."),
         };
+
+        let mut new_walls: Vec<SvgLine> = Vec::new();
 
         if !(containing_wall.x1 == wall_to_remove.x1 && containing_wall.y1 == wall_to_remove.y1) {
             let new_line_1 = SvgLine {
@@ -187,6 +205,38 @@ impl Maze {
         }
 
         (containing_wall, new_walls)
+
+        // let mut new_walls: Vec<SvgLine> = Vec::new();
+        //
+        // let containing_wall = match self.svg.walls
+        //     .iter()
+        //     .find(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
+        //     .cloned() {
+        //     Some(wall) => wall,
+        //     None => panic!("Containing wall doesn't exist"),
+        // };
+        //
+        // if !(containing_wall.x1 == wall_to_remove.x1 && containing_wall.y1 == wall_to_remove.y1) {
+        //     let new_line_1 = SvgLine {
+        //         x1: containing_wall.x1,
+        //         y1: containing_wall.y1,
+        //         x2: wall_to_remove.x1,
+        //         y2: wall_to_remove.y1,
+        //     };
+        //     new_walls.push(new_line_1);
+        // }
+        //
+        // if !(containing_wall.x2 == wall_to_remove.x2 && containing_wall.y2 == wall_to_remove.y2) {
+        //     let new_line_2 = SvgLine {
+        //         x1: wall_to_remove.x2,
+        //         y1: wall_to_remove.y2,
+        //         x2: containing_wall.x2,
+        //         y2: containing_wall.y2,
+        //     };
+        //     new_walls.push(new_line_2);
+        // }
+        //
+        // (containing_wall, new_walls)
     }
 
     fn contains_wall(&self, inside_wall: &SvgLine, containing_wall: &SvgLine) -> bool {

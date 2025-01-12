@@ -1,7 +1,11 @@
+use std::time::{Instant, Duration};
+
 use dioxus::prelude::*;
+
 use crate::generator_algorithms::random_prim;
 use crate::ui::components::{Header, MazeRender, Dropdown, Button};
 use crate::maze::Maze;
+use crate::cell::Coord;
 
 pub fn launch_app() {
     dioxus::launch(App);
@@ -10,7 +14,7 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let mut maze = use_signal(|| Maze::new(100, 100));
+    let mut maze = use_signal(|| Maze::new(150, 150));
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -44,7 +48,7 @@ fn App() -> Element {
             id: "buttons",
             Button::Button {
                 button_text: "Generate maze".to_string(),
-                onclick: move |_| random_prim::create_maze(&mut maze),
+                // onclick: move |_| random_prim::create_maze(&mut maze),
             }
         }
     }

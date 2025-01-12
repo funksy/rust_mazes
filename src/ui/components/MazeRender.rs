@@ -1,9 +1,6 @@
-use std::collections::HashSet;
-
 use dioxus::prelude::*;
 
 use crate::maze::Maze;
-use crate::cell::CellState;
 
 #[derive(PartialEq, Props, Clone)]
 pub struct MazeRenderProps {
@@ -34,12 +31,24 @@ pub fn MazeRender(props: MazeRenderProps) -> Element {
 
             g {
                 id: "walls",
-                for wall in &maze_svg.read().walls {
-                    line {
-                        x1: "{wall.x1}",
-                        y1: "{wall.y1}",
-                        x2: "{wall.x2}",
-                        y2: "{wall.y2}",
+                for horiz_wall_vec in &maze_svg.read().horiz_walls {
+                    for wall in horiz_wall_vec {
+                        line {
+                            x1: "{wall.x1}",
+                            y1: "{wall.y1}",
+                            x2: "{wall.x2}",
+                            y2: "{wall.y2}",
+                        }
+                    }
+                }
+                for vert_wall_vec in &maze_svg.read().vert_walls {
+                    for wall in vert_wall_vec {
+                        line {
+                            x1: "{wall.x1}",
+                            y1: "{wall.y1}",
+                            x2: "{wall.x2}",
+                            y2: "{wall.y2}",
+                        }
                     }
                 }
             }
