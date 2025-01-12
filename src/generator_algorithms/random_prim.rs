@@ -21,7 +21,7 @@ pub fn create_maze(maze: &mut Signal<Maze>) {
         let rand_frontier = rand_frontier(&mut frontier);
         let direction_of_rand_visited_neighbor: usize = choose_rand_neighbor(maze, &rand_frontier);
         remove_walls_between_cells(maze, &rand_frontier, direction_of_rand_visited_neighbor);
-        maze.change_cell_state(&rand_frontier, CellState::Path);
+        maze.visit_cell(&rand_frontier);
         add_cells_to_frontier(maze, &rand_frontier, &mut frontier);
     }
 }
