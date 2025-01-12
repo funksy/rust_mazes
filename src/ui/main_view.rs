@@ -3,6 +3,7 @@ use std::time::{Instant, Duration};
 use dioxus::prelude::*;
 
 use crate::generator_algorithms::random_prim;
+use crate::solver_algorithms::breadth_first_search;
 use crate::ui::components::{Header, MazeRender, Dropdown, Button};
 use crate::maze::Maze;
 use crate::cell::Coord;
@@ -14,7 +15,12 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let mut maze = use_signal(|| Maze::new(150, 150));
+    let mut height: Signal<usize> = use_signal(|| 10);
+    let mut width: Signal<usize> = use_signal(|| 10);
+    let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
+    let mut generated: Signal<bool> = use_signal(|| false);
+    let mut solved: Signal<bool> = use_signal(|| false);
+
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -31,24 +37,49 @@ fn App() -> Element {
 
         Header::Header{}
         MazeRender::MazeRender { maze: maze }
-        div{
+        div {
+            id: "maze-config",
+            Button::Button {
+                button_text: "Reset",
+                onclick: move |_| {
+                    maze.set(Maze::new(*height.read(), *width.read()));
+                    generated.set(false);
+                    solved.set(false);
+                },
+            }
+        }
+        div {
             id: "dropdowns",
             Dropdown::Dropdown {
-                id: "generator_dropdown",
+                id: "generator-dropdown",
                 options: gen_dropdown_props,
                 helper_text: "Maze Generator Algo".to_string()
             }
             Dropdown::Dropdown {
-                id: "solver_dropdown",
+                id: "solver-dropdown",
                 options: solve_dropdown_props,
                 helper_text: "Maze Solver Algo".to_string()
             }
         }
         div {
-            id: "buttons",
+            id: "algo-buttons",
             Button::Button {
                 button_text: "Generate maze".to_string(),
-                onclick: move |_| random_prim::create_maze(&mut maze),
+                disabled: *generated.read(),
+                onclick: move |_| {
+                    random_prim::create_maze(&mut maze);
+                    generated.set(true);
+                },
+            }
+            Button::Button {
+                button_text: "Solve maze".to_string(),
+                disabled: !*generated.read() || *solved.read(),
+                onclick: move |_| {
+                    let start = &Coord { x: 0, y: 0 };
+                    let finish = &Coord { x: maze.read().width() - 1, y: maze.read().height() - 1 };
+                    breadth_first_search::find_solution(&mut maze, start, finish);
+                    solved.set(true);
+                },
             }
         }
     }

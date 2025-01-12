@@ -1,7 +1,6 @@
 body {
     display: flex;
     flex-flow: column;
-    height: 100vh;
     justify-content: center;
     align-items: center;
 }
@@ -10,15 +9,15 @@ body {
     display: flex;
     flex-flow: column;
     align-items: center;
-    width: 100vh;
-    height: 100vh;
+    width: 95%;
+    height: 95%;
 }
 
 svg {
-    height: 65vh;
-    width: 65vh;
-    padding: 20px;
-    margin: 20px;
+    height: 70vh;
+    width: 100%;
+    padding: 10px;
+    margin: 10px;
 }
 
 line {
@@ -27,16 +26,30 @@ line {
     stroke-linecap: square;
 }
 
+
+
 #dropdowns {
     display: flex;
     flex-flow: row;
-    width: 50%;
-    margin: 20px;
+    width: 20%;
     justify-content: space-around;
 }
 
 select {
     width: 180px;
     padding: 4px;
+    margin: 10px;
     text-align: center;
+}
+
+#algo-buttons {
+    display: flex;
+    flex-flow: row;
+    width: 20%;
+    justify-content: space-around;
+}
+
+button {
+    padding: 4px;
+    margin: 10px;
 }

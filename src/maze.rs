@@ -129,7 +129,7 @@ impl Maze {
         match cell_state {
             CellState::Unvisited => "lightgrey".to_string(),
             CellState::Path => "white".to_string(),
-            CellState::Frontier => "white".to_string(),
+            CellState::Frontier => "yellow".to_string(),
             CellState::Solution => "pink".to_string(),
             CellState::Start => "green".to_string(),
             CellState::Finish => "red".to_string(),
