@@ -10,7 +10,7 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let mut maze = use_signal(|| Maze::new(50, 50));
+    let mut maze = use_signal(|| Maze::new(100, 100));
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),

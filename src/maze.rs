@@ -1,30 +1,84 @@
-use std::io::{self, Write};
+use std::collections::HashSet;
+use dioxus::html::KeyCode::P;
 use crate::cell::{Cell, CellState, Coord};
+
+#[derive(PartialEq, Clone)]
+pub struct SvgRect {
+    pub x: i32,
+    pub y: i32,
+    pub width: i32,
+    pub height: i32,
+    pub fill: String,
+}
+
+#[derive(Hash, Eq, PartialEq, Clone, Copy)]
+pub struct SvgLine {
+    pub x1: i32,
+    pub y1: i32,
+    pub x2: i32,
+    pub y2: i32,
+}
+
+#[derive(PartialEq, Clone)]
+pub struct SvgRender {
+    pub cells: Vec<SvgRect>,
+    pub walls: HashSet<SvgLine>,
+}
 
 pub struct Maze {
     height: usize,
     width: usize,
     grid: Vec<Cell>,
-    pub frame: String,
+    svg: SvgRender,
 }
+
+const CELL_SIZE: i32 = 3;
 
 impl Maze {
     pub fn new(height: usize, width: usize) -> Self {
         let mut grid = Vec::new();
-
-        // let (height, width) = Self::get_maze_dimensions();
-
+        let mut cells: Vec<SvgRect> = Vec::new();
         for y in 0..height {
             for x in 0..width {
                 grid.push(Cell::new(Coord{ y, x }));
+                cells.push(SvgRect {
+                    x: x as i32 * CELL_SIZE,
+                    y: y as i32 * CELL_SIZE,
+                    width: CELL_SIZE,
+                    height: CELL_SIZE,
+                    fill: "lightgrey".to_string()
+                });
             }
+        }
+
+        let mut walls: HashSet<SvgLine> = HashSet::new();
+        for y in 0..=height {
+            let horiz_wall = SvgLine {
+                x1: 0,
+                y1: y as i32 * CELL_SIZE,
+                x2: width as i32 * CELL_SIZE,
+                y2: y as i32 * CELL_SIZE,
+            };
+            walls.insert(horiz_wall);
+        }
+        for x in 0..=width {
+            let vert_wall = SvgLine {
+                x1: x as i32 * CELL_SIZE,
+                y1: 0,
+                x2: x as i32 * CELL_SIZE,
+                y2: height as i32 * CELL_SIZE,
+            };
+            walls.insert(vert_wall);
         }
 
         Self {
             height,
             width,
             grid,
-            frame: "".to_string()
+            svg: SvgRender {
+                cells,
+                walls,
+            }
         }
     }
 
@@ -40,124 +94,105 @@ impl Maze {
         &self.grid
     }
 
+    pub fn svg_render(&self) -> &SvgRender {
+        &self.svg
+    }
+
     pub fn get_cell_ref(&self, coord: &Coord) -> &Cell {
         &self.grid[coord.y * self.width + coord.x]
     }
 
     pub fn visit_cell(&mut self, coord: &Coord) {
         self.grid[coord.y * self.width + coord.x].visit();
-    }
-
-    pub fn remove_cell_wall(&mut self, coord: &Coord, wall: &str) {
-        self.grid[coord.y * self.width + coord.x].remove_wall(wall);
+        self.svg.cells[coord.y * self.width + coord.x].fill = self.get_cell_color(&self.get_cell_ref(coord).state());
     }
 
     pub fn change_cell_state(&mut self, coord: &Coord, new_state: CellState) {
         self.grid[coord.y * self.width + coord.x].change_state(new_state);
+        self.svg.cells[coord.y * self.width + coord.x].fill = self.get_cell_color(&self.get_cell_ref(coord).state());
     }
 
-    fn update_frame(&mut self) {
-        let mut top = "┏━".to_string();
-        for x in 0..(self.width - 1) {
-            top.push(if self.get_cell_ref(&Coord{ y: 0, x }).walls()[1] {'┳'} else {'━'});
-            top.push('━');
+    fn get_cell_color(&self, cell_state: &CellState) -> String {
+        match cell_state {
+            CellState::Unvisited => "lightgrey".to_string(),
+            CellState::Path => "white".to_string(),
+            CellState::Frontier => "white".to_string(),
+            CellState::Solution => "pink".to_string(),
+            CellState::Start => "green".to_string(),
+            CellState::Finish => "red".to_string(),
         }
-        top.push('┓');
+    }
 
-        let mut rows = Vec::new();
-        for y in 0..(self.height - 1) {
-            let mut row = if self.get_cell_ref(&Coord{ y, x: 0 }).walls()[2] {
-                "┣━".to_string()
-            } else {
-                "┃ ".to_string()
+    pub fn remove_cell_wall(&mut self, coord: &Coord, wall: &str) {
+        self.grid[coord.y * self.width + coord.x].remove_wall(wall);
+
+        match wall {
+            "top" => {
+                let wall_to_remove = SvgLine {
+                    x1: coord.x as i32 * CELL_SIZE,
+                    y1: coord.y as i32 * CELL_SIZE,
+                    x2: coord.x as i32 * CELL_SIZE + CELL_SIZE,
+                    y2: coord.y as i32 * CELL_SIZE
+                };
+
+                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove);
+                self.svg.walls.remove(&containing_wall);
+                self.svg.walls.extend(&new_walls);
+            },
+            "right" => {
+                let wall_to_remove = SvgLine {
+                    x1: coord.x as i32 * CELL_SIZE + CELL_SIZE,
+                    y1: coord.y as i32 * CELL_SIZE,
+                    x2: coord.x as i32 * CELL_SIZE + CELL_SIZE,
+                    y2: coord.y as i32 * CELL_SIZE + CELL_SIZE,
+                };
+
+                let (containing_wall, new_walls) = self.split_wall(&wall_to_remove);
+                self.svg.walls.remove(&containing_wall);
+                self.svg.walls.extend(&new_walls);
+            },
+            _ => {}
+        }
+    }
+
+    fn split_wall(&self, wall_to_remove: &SvgLine) -> (SvgLine, Vec<SvgLine>) {
+        let mut new_walls: Vec<SvgLine> = Vec::new();
+
+        let containing_wall = match self.svg.walls
+            .iter()
+            .find(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
+            .cloned() {
+            Some(wall) => wall,
+            None => panic!("Containing wall doesn't exist"),
+        };
+
+        if !(containing_wall.x1 == wall_to_remove.x1 && containing_wall.y1 == wall_to_remove.y1) {
+            let new_line_1 = SvgLine {
+                x1: containing_wall.x1,
+                y1: containing_wall.y1,
+                x2: wall_to_remove.x1,
+                y2: wall_to_remove.y1,
             };
-            for x in 1..self.width {
-                row.push(
-                    self.get_inner_junction(
-                        self.get_cell_ref(&Coord{ y, x: x - 1 }),
-                        self.get_cell_ref(&Coord{ y: y + 1, x }),
-                    )
-                );
-                row.push(if self.get_cell_ref(&Coord{ y, x }).walls()[2] {'━'} else {' '});
-            }
-            row.push(if self.get_cell_ref(&Coord{ y, x: self.width - 1 }).walls()[2] {
-                '┫'
-            } else {
-                '┃'
-            });
-            rows.push(row);
+            new_walls.push(new_line_1);
         }
 
-        let mut bot = "┗━".to_string();
-        for x in 0..(self.width - 1) {
-            bot.push(if self.get_cell_ref(&Coord{ y: self.height - 1, x }).walls()[1] {'┻'} else {'━'});
-            bot.push('━');
+        if !(containing_wall.x2 == wall_to_remove.x2 && containing_wall.y2 == wall_to_remove.y2) {
+            let new_line_2 = SvgLine {
+                x1: wall_to_remove.x2,
+                y1: wall_to_remove.y2,
+                x2: containing_wall.x2,
+                y2: containing_wall.y2,
+            };
+            new_walls.push(new_line_2);
         }
-        bot.push('┛');
 
-        self.frame = top;
-        self.frame.push_str("\n");
-        for row in rows {
-            self.frame.push_str(&row);
-            self.frame.push_str("\n");
-        }
-        self.frame.push_str(&bot);
+        (containing_wall, new_walls)
     }
 
-    pub fn show(&mut self) {
-        self.update_frame();
-        println!("{}", self.frame);
-    }
+    fn contains_wall(&self, inside_wall: &SvgLine, containing_wall: &SvgLine) -> bool {
+        let x_in_range = (inside_wall.x1 >= containing_wall.x1) && (inside_wall.x2 <= containing_wall.x2);
+        let y_in_range = (inside_wall.y1 >= containing_wall.y1) && (inside_wall.y2 <= containing_wall.y2);
 
-    fn get_inner_junction(&self, top_left_cell: &Cell, bottom_right_cell: &Cell) -> char {
-        let lookup: i8 =
-            ((top_left_cell.walls()[2] as i8) << 3 | (top_left_cell.walls()[1] as i8) << 1) |
-            ((bottom_right_cell.walls()[0] as i8) << 2 | (bottom_right_cell.walls()[3] as i8));
-
-        [' ', '╻', '╹', '┃', '╺', '┏', '┗', '┣',
-            '╸', '┓', '┛', '┫', '━', '┳', '┻', '╋'][lookup as usize]
-    }
-
-    fn get_maze_dimensions() -> (usize, usize) {
-        let rows: usize;
-        let cols: usize;
-
-        loop {
-            print!("Enter the desired number of rows: ");
-            io::stdout().flush().unwrap();
-
-            let mut row_input = String::new();
-            io::stdin()
-                .read_line(&mut row_input)
-                .expect("Failed to read line.");
-
-            match row_input.trim().parse() {
-                Ok(num) => {
-                    rows = num;
-                    break;
-                },
-                Err(_) => println!("\nPlease enter a valid positive number!\n"),
-            }
-        }
-
-        loop {
-            print!("Enter the desired number of cols: ");
-            io::stdout().flush().unwrap();
-
-            let mut col_input = String::new();
-            io::stdin()
-                .read_line(&mut col_input)
-                .expect("Failed to read line.");
-
-            match col_input.trim().parse() {
-                Ok(num) => {
-                    cols = num;
-                    break;
-                },
-                Err(_) => println!("\nPlease enter a valid positive number!\n"),
-            }
-        }
-
-        (rows, cols)
+        x_in_range && y_in_range
     }
 }
