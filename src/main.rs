@@ -11,19 +11,14 @@ use maze_generator::solver_algorithms::{ breadth_first_search };
 use maze_generator::ui;
 
 fn main() {
-    // launch_app();
+    launch_app();
 
-    let mut maze = Maze::new(200, 200);
+    // let mut maze = Maze::new(200, 200);
     //
-    // println!("vert_walls vec: {:?}", maze.svg_render().vert_walls);
-    //
-    // maze.remove_cell_wall(&Coord{ x: 0, y: 1}, "right");
-
-    //
-    let start = Instant::now();
-    random_prim::create_maze(&mut maze);
-    let duration = start.elapsed();
-    println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height(), maze.width());
+    // let start = Instant::now();
+    // random_prim::create_maze(&mut maze);
+    // let duration = start.elapsed();
+    // println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height(), maze.width());
     //
     // let start = Instant::now();
     // let mut renderer = MazeRenderer::new(&maze);

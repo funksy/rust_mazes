@@ -48,7 +48,7 @@ fn App() -> Element {
             id: "buttons",
             Button::Button {
                 button_text: "Generate maze".to_string(),
-                // onclick: move |_| random_prim::create_maze(&mut maze),
+                onclick: move |_| random_prim::create_maze(&mut maze),
             }
         }
     }

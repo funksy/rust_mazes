@@ -9,8 +9,8 @@ use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
 use crate::generator_algorithms::generator_helpers::{random_grid_position, remove_walls_between_cells};
 
-pub fn create_maze(maze: &mut Maze) {
-    // let maze: &mut Maze = &mut maze.write();
+pub fn create_maze(maze: &mut Signal<Maze>) {
+    let maze: &mut Maze = &mut maze.write();
     let mut frontier: IndexSet<Coord> = IndexSet::new();
 
     let start: Coord = random_grid_position(&maze);
