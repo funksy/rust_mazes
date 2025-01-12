@@ -13,10 +13,10 @@ use maze_generator::ui;
 fn main() {
     launch_app();
 
-    // let mut maze = Maze::new();
+    // let mut maze = Maze::new(200, 200);
     //
     // let start = Instant::now();
-    // recursive_backtracker::create_maze(&mut maze);
+    // random_prim::create_maze(&mut maze);
     // let duration = start.elapsed();
     // println!("It took {:?} to complete a maze of grid size {}x{}", duration, maze.height(), maze.width());
     //
