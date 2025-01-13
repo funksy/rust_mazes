@@ -1,10 +1,8 @@
-use std::time::{Instant, Duration};
-
 use dioxus::prelude::*;
 
 use crate::generator_algorithms::random_prim;
 use crate::solver_algorithms::breadth_first_search;
-use crate::ui::components::{Header, MazeRender, Dropdown, Button};
+use crate::ui::components::{Header, MazeRender, Dropdown, Button, NumInput};
 use crate::maze::Maze;
 use crate::cell::Coord;
 
@@ -15,8 +13,8 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let mut height: Signal<usize> = use_signal(|| 10);
-    let mut width: Signal<usize> = use_signal(|| 10);
+    let height: Signal<usize> = use_signal(|| 10);
+    let width: Signal<usize> = use_signal(|| 10);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
@@ -39,8 +37,18 @@ fn App() -> Element {
         MazeRender::MazeRender { maze: maze }
         div {
             id: "maze-config",
+            NumInput::NumInput {
+                value: height,
+                max_val: 150
+            }
+            NumInput::NumInput {
+                value: width,
+                max_val: 150
+            }
+
             Button::Button {
-                button_text: "Reset",
+                button_text: "New Maze",
+                disabled: false,
                 onclick: move |_| {
                     maze.set(Maze::new(*height.read(), *width.read()));
                     generated.set(false);
