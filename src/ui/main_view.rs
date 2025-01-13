@@ -48,7 +48,7 @@ fn App() -> Element {
                     NumInput::NumInput {
                         id: "height-input",
                         value: height,
-                        max_val: 150
+                        max_val: 200
                     }
                 }
                 div {
@@ -57,7 +57,7 @@ fn App() -> Element {
                     NumInput::NumInput {
                         id: "width-input",
                         value: width,
-                        max_val: 150
+                        max_val: 200
                     }
                 }
 
