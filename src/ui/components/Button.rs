@@ -1,19 +1,12 @@
 use dioxus::prelude::*;
 
-#[derive(PartialEq, Props, Clone)]
-pub struct ButtonProps {
-    onclick: EventHandler<MouseEvent>,
-    button_text: String,
-    #[props(default = false)]
-    disabled: bool,
-}
-
-pub fn Button(props: ButtonProps) -> Element {
+#[component]
+pub fn Button(onclick: EventHandler<MouseEvent>, button_text: String, disabled: bool) -> Element {
     rsx! {
         button {
-            disabled: "{props.disabled}",
-            onclick: move |evt| props.onclick.call(evt),
-            "{props.button_text}",
+            disabled: "{disabled}",
+            onclick: move |evt| onclick.call(evt),
+            "{button_text}",
         }
     }
 }
