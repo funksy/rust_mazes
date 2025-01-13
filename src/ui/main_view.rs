@@ -13,8 +13,8 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let height: Signal<usize> = use_signal(|| 10);
-    let width: Signal<usize> = use_signal(|| 10);
+    let height: Signal<usize> = use_signal(|| 15);
+    let width: Signal<usize> = use_signal(|| 15);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
@@ -22,8 +22,8 @@ fn App() -> Element {
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
-        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string())
-        , ("ellers".to_string(),"Ellers".to_string())
+        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string()),
+        ("ellers".to_string(),"Ellers".to_string())
     ];
 
     let solve_dropdown_props = vec![
