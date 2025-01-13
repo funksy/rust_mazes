@@ -8,6 +8,7 @@ pub struct SvgRect {
     pub width: i32,
     pub height: i32,
     pub fill: String,
+    pub stroke: String,
 }
 
 #[derive(Debug)]
@@ -52,7 +53,8 @@ impl Maze {
                     y: y as i32 * CELL_SIZE,
                     width: CELL_SIZE,
                     height: CELL_SIZE,
-                    fill: "lightgrey".to_string()
+                    fill: "lightgrey".to_string(),
+                    stroke: "lightgrey".to_string(),
                 });
             }
         }
@@ -118,11 +120,13 @@ impl Maze {
     pub fn visit_cell(&mut self, coord: &Coord) {
         self.grid[coord.y * self.width + coord.x].visit();
         self.svg.cells[coord.y * self.width + coord.x].fill = self.get_cell_color(&self.get_cell_ref(coord).state());
+        self.svg.cells[coord.y * self.width + coord.x].stroke = self.get_cell_color(&self.get_cell_ref(coord).state());
     }
 
     pub fn change_cell_state(&mut self, coord: &Coord, new_state: CellState) {
         self.grid[coord.y * self.width + coord.x].change_state(new_state);
         self.svg.cells[coord.y * self.width + coord.x].fill = self.get_cell_color(&self.get_cell_ref(coord).state());
+        self.svg.cells[coord.y * self.width + coord.x].stroke = self.get_cell_color(&self.get_cell_ref(coord).state());
     }
 
     fn get_cell_color(&self, cell_state: &CellState) -> String {
@@ -130,7 +134,7 @@ impl Maze {
             CellState::Unvisited => "lightgrey".to_string(),
             CellState::Path => "white".to_string(),
             CellState::Frontier => "yellow".to_string(),
-            CellState::Solution => "pink".to_string(),
+            CellState::Solution => "dodgerblue".to_string(),
             CellState::Start => "green".to_string(),
             CellState::Finish => "red".to_string(),
         }
@@ -205,38 +209,6 @@ impl Maze {
         }
 
         (containing_wall, new_walls)
-
-        // let mut new_walls: Vec<SvgLine> = Vec::new();
-        //
-        // let containing_wall = match self.svg.walls
-        //     .iter()
-        //     .find(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
-        //     .cloned() {
-        //     Some(wall) => wall,
-        //     None => panic!("Containing wall doesn't exist"),
-        // };
-        //
-        // if !(containing_wall.x1 == wall_to_remove.x1 && containing_wall.y1 == wall_to_remove.y1) {
-        //     let new_line_1 = SvgLine {
-        //         x1: containing_wall.x1,
-        //         y1: containing_wall.y1,
-        //         x2: wall_to_remove.x1,
-        //         y2: wall_to_remove.y1,
-        //     };
-        //     new_walls.push(new_line_1);
-        // }
-        //
-        // if !(containing_wall.x2 == wall_to_remove.x2 && containing_wall.y2 == wall_to_remove.y2) {
-        //     let new_line_2 = SvgLine {
-        //         x1: wall_to_remove.x2,
-        //         y1: wall_to_remove.y2,
-        //         x2: containing_wall.x2,
-        //         y2: containing_wall.y2,
-        //     };
-        //     new_walls.push(new_line_2);
-        // }
-        //
-        // (containing_wall, new_walls)
     }
 
     fn contains_wall(&self, inside_wall: &SvgLine, containing_wall: &SvgLine) -> bool {

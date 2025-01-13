@@ -1,9 +1,10 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn NumInput(mut value: Signal<usize>, max_val: usize) -> Element {
+pub fn NumInput(id: String, mut value: Signal<usize>, max_val: usize) -> Element {
     rsx! {
         input {
+            id: "{id}",
             type: "number",
             placeholder: "",
             max: max_val,
