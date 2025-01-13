@@ -11,13 +11,16 @@ body {
     align-items: center;
     width: 95%;
     height: 95%;
+    font-family: Titillium Web;
 }
 
 svg {
     height: 70vh;
     width: 100%;
-    padding: 10px;
-    margin: 10px;
+}
+
+rect {
+    stroke-width: 0.1%;
 }
 
 line {
@@ -26,25 +29,46 @@ line {
     stroke-linecap: square;
 }
 
+#maze-controls {
+    display: flex;
+    flex-flow: row;
+    width: 60vh;
+    justify-content: space-between;
+}
+
 #maze-config {
     display: flex;
-    flex-flow: row;
-    width: 15%;
-    justify-content: space-around;
-    align-items: center;
+    flex-flow: column;
 }
 
-input {
-    width: 50px;
-    height: 20px;
-    padding: 4px;
-}
-
-#dropdowns {
+#height-config {
     display: flex;
     flex-flow: row;
-    width: 20%;
-    justify-content: space-around;
+    justify-content: space-evenly;
+    align-items: start;
+    width: 150px;
+}
+
+#width-config {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-evenly;
+    align-items: start;
+    width: 150px;
+}
+
+#generator-config {
+    display: flex;
+    flex-flow: column;
+}
+
+#solver-config {
+    display: flex;
+    flex-flow: column;
+}
+
+h2 {
+    text-align: center;
 }
 
 select {
@@ -52,16 +76,19 @@ select {
     padding: 4px;
     margin: 10px;
     text-align: center;
+    font-family: "Titillium Web";
 }
 
-#algo-buttons {
-    display: flex;
-    flex-flow: row;
-    width: 20%;
-    justify-content: space-around;
+input {
+    width: 45px;
+    padding: 4px;
+    margin: 10px;
+    font-family: "Titillium Web";
 }
 
 button {
+    width: 180px;
     padding: 4px;
     margin: 10px;
+    font-family: "Titillium Web";
 }

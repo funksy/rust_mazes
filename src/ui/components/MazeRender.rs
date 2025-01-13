@@ -24,7 +24,8 @@ pub fn MazeRender(props: MazeRenderProps) -> Element {
                         y: "{cell.y}",
                         width: "{cell.width}",
                         height: "{cell.height}",
-                        fill: "{cell.fill}"
+                        fill: "{cell.fill}",
+                        stroke: "{cell.stroke}"
                     }
                 }
             }
