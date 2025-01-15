@@ -43,8 +43,8 @@ const CELL_SIZE: i32 = 3;
 
 impl Maze {
     pub fn new(height: usize, width: usize) -> Self {
-        let mut grid = Vec::new();
-        let mut cells: Vec<SvgRect> = Vec::new();
+        let mut grid = Vec::with_capacity(height * width);
+        let mut cells: Vec<SvgRect> = Vec::with_capacity(height * width);
         for y in 0..height {
             for x in 0..width {
                 grid.push(Cell::new(Coord{ y, x }));
