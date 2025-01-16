@@ -15,18 +15,18 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let height: Signal<usize> = use_signal(|| 4);
-    let width: Signal<usize> = use_signal(|| 4);
+    let height: Signal<usize> = use_signal(|| 10);
+    let width: Signal<usize> = use_signal(|| 10);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
 
     let mut generator_algo = RandomPrim::new();
 
-    let mut solver_algo = BreadthFirstSearch::new(
-        &Coord { x: 0, y: 0 },
-        &Coord { x: width - 1, y: width - 1 }
-    );
+    let starting_coord = &Coord { x: 0, y: 0 };
+    let finishing_coord = &Coord { x: width - 1, y: width - 1 };
+
+    let mut solver_algo = BreadthFirstSearch::new(starting_coord, finishing_coord);
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -91,7 +91,7 @@ fn App() -> Element {
                     button_text: "Generate maze".to_string(),
                     disabled: *generated.read(),
                     onclick: move |_| {
-                        if generator_algo.status != GeneratorStatus::Done {
+                        while generator_algo.status != GeneratorStatus::Done {
                             generator_algo.create_maze(&mut maze);
                         }
                         if generator_algo.status == GeneratorStatus::Done {
@@ -112,7 +112,7 @@ fn App() -> Element {
                     button_text: "Solve maze".to_string(),
                     disabled: !*generated.read() || *solved.read(),
                     onclick: move |_| {
-                        if solver_algo.status != SolverStatus::Done {
+                        while solver_algo.status != SolverStatus::Done {
                             solver_algo.find_solution(&mut maze);
                         }
                         if solver_algo.status == SolverStatus::Done {
