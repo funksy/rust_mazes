@@ -2,19 +2,15 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 
-#[derive(PartialEq, Props, Clone)]
-pub struct MazeRenderProps {
-    maze: Signal<Maze>,
-}
-
 const CELL_SIZE: i32 = 3;
 
-pub fn MazeRender(props: MazeRenderProps) -> Element {
-    let maze_svg = use_memo(move || props.maze.read().svg_render().clone());
+#[component]
+pub fn MazeRender(maze: Signal<Maze>) -> Element {
+    let maze_svg = use_memo(move || maze.read().svg_render().clone());
 
     rsx! {
         svg {
-            view_box: "{-CELL_SIZE} {-CELL_SIZE} {props.maze.read().width() as i32 * CELL_SIZE + 2 * CELL_SIZE} {props.maze.read().height() as i32 * CELL_SIZE + 2 * CELL_SIZE}",
+            view_box: "{-CELL_SIZE} {-CELL_SIZE} {maze.read().width() as i32 * CELL_SIZE + 2 * CELL_SIZE} {maze.read().height() as i32 * CELL_SIZE + 2 * CELL_SIZE}",
 
             g {
                 id: "cells",

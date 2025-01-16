@@ -3,6 +3,13 @@ use rand::{thread_rng, Rng};
 use crate::maze::Maze;
 use crate::cell::Coord;
 
+#[derive(PartialEq)]
+pub enum GeneratorStatus {
+    Initialized,
+    InProgress,
+    Done,
+}
+
 pub fn random_grid_position (maze: &Maze) -> Coord {
     let y = thread_rng().gen_range(0..maze.height());
     let x = thread_rng().gen_range(0..maze.width());
