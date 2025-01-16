@@ -17,16 +17,30 @@ static CSS: Asset = asset!("src/ui/assets/main.css");
 fn App() -> Element {
     let height: Signal<usize> = use_signal(|| 10);
     let width: Signal<usize> = use_signal(|| 10);
+
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
 
     let mut generator_algo = RandomPrim::new();
 
-    let starting_coord = &Coord { x: 0, y: 0 };
-    let finishing_coord = &Coord { x: width - 1, y: width - 1 };
+    let mut starting_coord_x: Signal<usize> = use_signal(|| 0);
+    let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
+    let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
+    let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
+    let mut starting_coord: Signal<Coord> = use_signal(|| Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
+    let mut finishing_coord: Signal<Coord> = use_signal(|| Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
+    let mut solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
 
-    let mut solver_algo = BreadthFirstSearch::new(starting_coord, finishing_coord);
+    use_effect(move || {
+        starting_coord_x();
+        starting_coord_y();
+        finishing_coord_x();
+        finishing_coord_y();
+
+        starting_coord.set(Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
+        finishing_coord.set(Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
+    });
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -56,7 +70,8 @@ fn App() -> Element {
                     NumInput::NumInput {
                         id: "height-input",
                         value: height,
-                        max_val: 200
+                        max_val: 200,
+                        min_val: 2,
                     }
                 }
                 div {
@@ -65,7 +80,8 @@ fn App() -> Element {
                     NumInput::NumInput {
                         id: "width-input",
                         value: width,
-                        max_val: 200
+                        max_val: 200,
+                        min_val: 2,
                     }
                 }
 
@@ -74,6 +90,10 @@ fn App() -> Element {
                     disabled: false,
                     onclick: move |_| {
                         maze.set(Maze::new(*height.read(), *width.read()));
+                        starting_coord_x.set(0);
+                        starting_coord_y.set(0);
+                        finishing_coord_x.set(width - 1);
+                        finishing_coord_y.set(height - 1);
                         generated.set(false);
                         solved.set(false);
                     },
@@ -107,6 +127,45 @@ fn App() -> Element {
                     id: "solver-dropdown",
                     options: solve_dropdown_props,
                     helper_text: "Maze Solver Algo".to_string()
+                }
+                div {
+                    id: "start-finish-config",
+                    h4 { "START" }
+                    div {
+                        id: "starting-coord-config",
+                        p { "x:" }
+                        NumInput::NumInput {
+                            id: "starting-coord-x",
+                            value: starting_coord_x,
+                            max_val: *width.read(),
+                            min_val: 0,
+                        }
+                        p { "y:" }
+                        NumInput::NumInput {
+                            id: "starting-coord-y",
+                            value: starting_coord_y,
+                            max_val: *height.read(),
+                            min_val: 0,
+                        }
+                    }
+                    h4 { "FINISH" }
+                    div {
+                        id: "finishing-coord-config",
+                        p { "x:" }
+                        NumInput::NumInput {
+                            id: "finishing-coord-x",
+                            value: finishing_coord_x,
+                            max_val: *width.read(),
+                            min_val: 0,
+                        }
+                        p { "y:" }
+                        NumInput::NumInput {
+                            id: "finishing-coord-y",
+                            value: finishing_coord_y,
+                            max_val: *height.read(),
+                            min_val: 0,
+                        }
+                    }
                 }
                 Button::Button {
                     button_text: "Solve maze".to_string(),
