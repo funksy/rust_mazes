@@ -15,7 +15,7 @@ body {
 }
 
 svg {
-    height: 70vh;
+    height: 60vh;
     width: 100%;
 }
 
@@ -32,7 +32,7 @@ line {
 #maze-controls {
     display: flex;
     flex-flow: row;
-    width: 60vh;
+    width: 50vh;
     justify-content: space-between;
 }
 
@@ -65,6 +65,30 @@ line {
 #solver-config {
     display: flex;
     flex-flow: column;
+}
+
+#solver-config h4 {
+    margin: 0;
+    font-size: small;
+}
+
+#start-finish-config {
+    display: flex;
+    flex-flow: column;
+    text-align: center;
+}
+
+#starting-coord-config {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+#finishing-coord-config {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
 }
 
 h2 {
