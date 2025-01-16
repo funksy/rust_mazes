@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::generator_algorithms::random_prim;
-use crate::solver_algorithms::breadth_first_search;
+use crate::generator_algorithms::generator_helpers::GeneratorStatus;
+use crate::generator_algorithms::random_prim::RandomPrim;
+use crate::solver_algorithms::solver_helpers::SolverStatus;
+use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
 use crate::ui::components::{Header, MazeRender, Dropdown, Button, NumInput};
 use crate::maze::Maze;
 use crate::cell::Coord;
@@ -13,12 +15,18 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let height: Signal<usize> = use_signal(|| 15);
-    let width: Signal<usize> = use_signal(|| 15);
+    let height: Signal<usize> = use_signal(|| 4);
+    let width: Signal<usize> = use_signal(|| 4);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
 
+    let mut generator_algo = RandomPrim::new();
+
+    let mut solver_algo = BreadthFirstSearch::new(
+        &Coord { x: 0, y: 0 },
+        &Coord { x: width - 1, y: width - 1 }
+    );
 
     let gen_dropdown_props = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -83,8 +91,12 @@ fn App() -> Element {
                     button_text: "Generate maze".to_string(),
                     disabled: *generated.read(),
                     onclick: move |_| {
-                        random_prim::create_maze(&mut maze);
-                        generated.set(true);
+                        if generator_algo.status != GeneratorStatus::Done {
+                            generator_algo.create_maze(&mut maze);
+                        }
+                        if generator_algo.status == GeneratorStatus::Done {
+                            generated.set(true);
+                        }
                     },
                 }
             }
@@ -100,10 +112,12 @@ fn App() -> Element {
                     button_text: "Solve maze".to_string(),
                     disabled: !*generated.read() || *solved.read(),
                     onclick: move |_| {
-                        let start = &Coord { x: 0, y: 0 };
-                        let finish = &Coord { x: maze.read().width() - 1, y: maze.read().height() - 1 };
-                        breadth_first_search::find_solution(&mut maze, start, finish);
-                        solved.set(true);
+                        if solver_algo.status != SolverStatus::Done {
+                            solver_algo.find_solution(&mut maze);
+                        }
+                        if solver_algo.status == SolverStatus::Done {
+                            solved.set(true);
+                        }
                     },
                 }
             }
