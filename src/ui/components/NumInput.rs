@@ -6,7 +6,6 @@ pub fn NumInput(id: String, mut value: Signal<usize>, max_val: usize, min_val: u
         input {
             id: "{id}",
             type: "number",
-            placeholder: "",
             max: max_val,
             min: min_val,
             value: value,
