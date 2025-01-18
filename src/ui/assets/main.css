@@ -1,42 +1,83 @@
 body {
-    display: flex;
-    flex-flow: column;
-    justify-content: center;
-    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
 }
 
 #main {
     display: flex;
-    flex-flow: column;
-    align-items: center;
-    width: 95%;
-    height: 95%;
+    flex-flow: row;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
     font-family: Titillium Web;
 }
 
-svg {
-    height: 60vh;
-    width: 100%;
-}
-
-rect {
-    stroke-width: 0.1%;
-}
-
-line {
-    stroke: darkslateblue;
-    stroke-width: 0.5;
-    stroke-linecap: square;
-}
-
-#maze-controls {
+#sidebar {
     display: flex;
-    flex-flow: row;
-    width: 50vh;
-    justify-content: space-between;
+    flex-flow: column;
+    width: 220px;
+    height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    font-size: xxx-large;
+    margin: 4px;
+}
+
+form {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+label {
+    padding: 4px;
+}
+
+input {
+    padding: 4px;
+    margin: 4px;
+}
+
+button {
+    width: 60%;
+    align-self: center;
+    padding: 4px;
+}
+
+select {
+    padding: 4px;
+    margin: 4px;
+}
+
+fieldset {
+    border-top: 2px solid black;
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 0;
+    display: grid;
+    justify-items: center;
+}
+
+.config-div {
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+legend {
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: larger;
 }
 
 #maze-config {
+    display: flex;
+    flex-flow: column;
+}
+
+#dimension-config {
     display: flex;
     flex-flow: column;
 }
@@ -78,11 +119,21 @@ line {
     text-align: center;
 }
 
+.coord-label {
+    margin: 0;
+    margin-top: 4px;
+    padding: 0;
+    font-size: medium;
+}
+
+#start-finish-config input {
+    width: 40px;
+}
+
 #starting-coord-config {
     display: flex;
     flex-flow: row;
     justify-content: center;
-    margin-bottom: 12px;
 }
 
 #finishing-coord-config {
@@ -95,24 +146,17 @@ h2 {
     text-align: center;
 }
 
-select {
-    width: 180px;
-    padding: 4px;
-    margin: 10px;
-    text-align: center;
-    font-family: "Titillium Web";
+svg {
+    height: 100%;
+    width: 100%;
 }
 
-input {
-    width: 45px;
-    padding: 4px;
-    margin: 10px;
-    font-family: "Titillium Web";
+rect {
+    stroke-width: 0.1%;
 }
 
-button {
-    width: 180px;
-    padding: 4px;
-    margin: 10px;
-    font-family: "Titillium Web";
+line {
+    stroke: darkslateblue;
+    stroke-width: 0.5;
+    stroke-linecap: square;
 }

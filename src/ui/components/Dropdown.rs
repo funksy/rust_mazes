@@ -1,24 +1,18 @@
 use dioxus::prelude::*;
 
-#[derive(PartialEq, Props, Clone)]
-pub struct DropdownProps {
-    pub options: Vec<(String, String)>,
-    pub helper_text: String,
-    pub id: String,
-}
-
-pub fn Dropdown(props: DropdownProps) -> Element {
+#[component]
+pub fn Dropdown(options: Vec<(String, String)>, helper_text: String, id: String,) -> Element {
     let mut selected = use_signal(|| String::new());
 
     rsx!{
         select {
-            id: "{props.id}",
+            id: "{id}",
             value: "{selected}",
             onchange: move |event| selected.set(event.value()),
 
-            option { selected: "", disabled: true, value: "", "{props.helper_text}" },
+            option { selected: "", disabled: true, value: "", "{helper_text}" },
 
-            for option in props.options {
+            for option in options {
                 option { key: "{option.0}", value: "{option.0}", label: "{option.1}" }
             }
         }
