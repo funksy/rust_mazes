@@ -1,9 +1,10 @@
+use dioxus::html::link::disabled;
 use dioxus::prelude::*;
 
 use crate::ui::components::Dropdown::Dropdown;
 
 #[component]
-pub fn GeneratorConfig(dropdown_options: Vec<(String, String)>) -> Element {
+pub fn GeneratorConfig(dropdown_options: Vec<(String, String)>, generator_algo_choice: Signal<String>, generated: bool) -> Element {
     rsx! {
         form {
             fieldset {
@@ -14,6 +15,8 @@ pub fn GeneratorConfig(dropdown_options: Vec<(String, String)>) -> Element {
                     id: "generator-dropdown",
                     options: dropdown_options,
                     helper_text: "Maze Generator Algo".to_string(),
+                    value: generator_algo_choice,
+                    disabled: generated,
                 }
             }
         }

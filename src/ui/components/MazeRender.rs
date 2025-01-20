@@ -5,12 +5,16 @@ use crate::maze::Maze;
 const CELL_SIZE: i32 = 3;
 
 #[component]
-pub fn MazeRender(maze: Signal<Maze>) -> Element {
+pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
     let maze_svg = use_memo(move || maze.read().svg_render().clone());
+
+    use_effect(move || {
+       maze.read();
+    });
 
     rsx! {
         svg {
-            view_box: "{-CELL_SIZE} {-CELL_SIZE} {maze.read().width() as i32 * CELL_SIZE + 2 * CELL_SIZE} {maze.read().height() as i32 * CELL_SIZE + 2 * CELL_SIZE}",
+            view_box: "{-0.5} {0} {maze.read().width() as i32 * CELL_SIZE + 1} {maze.read().height() as i32 * CELL_SIZE}",
 
             g {
                 id: "cells",

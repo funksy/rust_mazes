@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::generator_algorithms::generator_helpers::GeneratorStatus;
+use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorAlgo, GeneratorStatus};
 use crate::generator_algorithms::random_prim::RandomPrim;
 use crate::solver_algorithms::solver_helpers::SolverStatus;
 use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
@@ -22,7 +22,8 @@ fn App() -> Element {
     let mut generated: Signal<bool> = use_signal(|| false);
     let mut solved: Signal<bool> = use_signal(|| false);
 
-    let mut generator_algo = RandomPrim::new();
+    let generator_algo_choice: Signal<String> = use_signal(|| "random_prim".to_string());
+    let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
 
     let mut starting_coord: Signal<Coord> = use_signal(|| Coord { x: 0, y: 0 });
     let mut finishing_coord: Signal<Coord> = use_signal(|| Coord { x: *width.read() - 1, y: *height.read() - 1 });
@@ -31,6 +32,12 @@ fn App() -> Element {
     let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
     let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
     let mut solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
+
+    use_effect(move || {
+        generator_algo_choice();
+
+        generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
+    });
 
     use_effect(move || {
         starting_coord_x();
@@ -44,8 +51,7 @@ fn App() -> Element {
 
     let gen_dropdown_options = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
-        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string()),
-        ("ellers".to_string(),"Ellers".to_string())
+        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string())
     ];
 
     let solve_dropdown_options = vec![
@@ -78,6 +84,7 @@ fn App() -> Element {
                         finishing_coord_x.set(width - 1);
                         finishing_coord_y.set(height - 1);
                         generated.set(false);
+                        generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
                         solved.set(false);
                     },
                 }
@@ -87,15 +94,17 @@ fn App() -> Element {
                 class: "config-div",
                 GeneratorConfig::GeneratorConfig {
                     dropdown_options: gen_dropdown_options,
+                    generator_algo_choice: generator_algo_choice,
+                    generated: *generated.read(),
                 }
                 Button::Button {
                 button_text: "Generate maze".to_string(),
                 disabled: *generated.read(),
                 onclick: move |_| {
-                    while generator_algo.status != GeneratorStatus::Done {
-                        generator_algo.create_maze(&mut maze);
+                    while generator_algo.read().status() != &GeneratorStatus::Done {
+                        generator_algo.write().create_maze(&mut maze);
                     }
-                    if generator_algo.status == GeneratorStatus::Done {
+                    if generator_algo.read().status() == &GeneratorStatus::Done {
                         generated.set(true);
                         }
                     },
@@ -112,6 +121,7 @@ fn App() -> Element {
                     starting_coord_y: starting_coord_y,
                     finishing_coord_x: finishing_coord_x,
                     finishing_coord_y: finishing_coord_y,
+                    solved: *solved.read(),
                 }
                 Button::Button {
                 button_text: "Solve maze".to_string(),
@@ -119,7 +129,7 @@ fn App() -> Element {
                 onclick: move |_| {
                     if solved() {
                             solver_algo.reset(&mut maze);
-                            solver_algo = (BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read()));
+                            solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
                         }
                     while solver_algo.status != SolverStatus::Done {
                         solver_algo.find_solution(&mut maze);
@@ -138,3 +148,4 @@ fn App() -> Element {
         }
     }
 }
+
