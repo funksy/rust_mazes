@@ -1,14 +1,13 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn Dropdown(options: Vec<(String, String)>, helper_text: String, id: String,) -> Element {
-    let mut selected = use_signal(|| String::new());
-
+pub fn Dropdown(options: Vec<(String, String)>, helper_text: String, id: String, mut value: Signal<String>, disabled: bool) -> Element {
     rsx!{
         select {
             id: "{id}",
-            value: "{selected}",
-            onchange: move |event| selected.set(event.value()),
+            value: "{value}",
+            disabled: disabled,
+            onchange: move |event| value.set(event.value()),
 
             option { selected: "", disabled: true, value: "", "{helper_text}" },
 

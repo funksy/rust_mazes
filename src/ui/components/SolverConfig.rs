@@ -12,6 +12,7 @@ pub fn SolverConfig(
     starting_coord_y: Signal<usize>,
     finishing_coord_x: Signal<usize>,
     finishing_coord_y: Signal<usize>,
+    solved: bool,
 ) -> Element {
 
     rsx! {
@@ -24,6 +25,8 @@ pub fn SolverConfig(
                     id: "solver-dropdown",
                     options: dropdown_options,
                     helper_text: "Maze Solver Algo".to_string(),
+                    value: use_signal(|| String::new()),
+                    disabled: solved,
                 }
                 div {
                     id: "start-finish-config",
