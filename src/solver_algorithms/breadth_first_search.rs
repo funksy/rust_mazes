@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::solver_algorithms::solver_helpers::SolverStatus;
+use crate::solver_algorithms::solver_helpers::{reset_solver, SolverStatus};
 
 pub struct BreadthFirstSearch {
     start: Coord,
@@ -98,5 +98,10 @@ impl BreadthFirstSearch {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
+    }
+
+    pub fn reset(&self, maze: &mut Signal<Maze>) {
+        let maze = &mut maze.write();
+        reset_solver(maze);
     }
 }

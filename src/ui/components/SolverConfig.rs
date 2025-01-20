@@ -8,23 +8,11 @@ pub fn SolverConfig(
     dropdown_options: Vec<(String, String)>,
     height: Signal<usize>,
     width: Signal<usize>,
-    starting_coord: Signal<Coord>,
-    finishing_coord: Signal<Coord>
+    starting_coord_x: Signal<usize>,
+    starting_coord_y: Signal<usize>,
+    finishing_coord_x: Signal<usize>,
+    finishing_coord_y: Signal<usize>,
 ) -> Element {
-    let mut starting_coord_x: Signal<usize> = use_signal(|| 0);
-    let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
-    let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
-    let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
-
-    use_effect(move || {
-        starting_coord_x();
-        starting_coord_y();
-        finishing_coord_x();
-        finishing_coord_y();
-
-        starting_coord.set(Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
-        finishing_coord.set(Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
-    });
 
     rsx! {
         form {
@@ -47,14 +35,14 @@ pub fn SolverConfig(
                             NumInput {
                                 id: "starting-coord-x",
                                 value: starting_coord_x,
-                                max_val: *width.read(),
+                                max_val: *width.read() - 1,
                                 min_val: 0,
                             }
                             label { for: "starting-coord-y", "y:" },
                             NumInput {
                                 id: "starting-coord-y",
                                 value: starting_coord_y,
-                                max_val: *height.read(),
+                                max_val: *height.read() - 1,
                                 min_val: 0,
                             }
                         }
@@ -67,14 +55,14 @@ pub fn SolverConfig(
                             NumInput {
                                 id: "finishing-coord-x",
                                 value: finishing_coord_x,
-                                max_val: *width.read(),
+                                max_val: *width.read() - 1,
                                 min_val: 0,
                             }
                             label { for: "finishing-coord-y", "y:" },
                             NumInput {
                                 id: "finishing-coord-y",
                                 value: finishing_coord_y,
-                                max_val: *height.read(),
+                                max_val: *height.read() - 1,
                                 min_val: 0,
                             }
                         }

@@ -26,7 +26,21 @@ fn App() -> Element {
 
     let mut starting_coord: Signal<Coord> = use_signal(|| Coord { x: 0, y: 0 });
     let mut finishing_coord: Signal<Coord> = use_signal(|| Coord { x: *width.read() - 1, y: *height.read() - 1 });
+    let mut starting_coord_x: Signal<usize> = use_signal(|| 0);
+    let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
+    let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
+    let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
     let mut solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
+
+    use_effect(move || {
+        starting_coord_x();
+        starting_coord_y();
+        finishing_coord_x();
+        finishing_coord_y();
+
+        starting_coord.set(Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
+        finishing_coord.set(Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
+    });
 
     let gen_dropdown_options = vec![
         ("random_prim".to_string(),"Random Prim".to_string()),
@@ -59,6 +73,10 @@ fn App() -> Element {
                         maze.set(Maze::new(*height.read(), *width.read()));
                         starting_coord.set(Coord { x: 0, y: 0 });
                         finishing_coord.set(Coord { x: *width.read() - 1, y: *height.read() - 1 });
+                        starting_coord_x.set(0);
+                        starting_coord_y.set(0);
+                        finishing_coord_x.set(width - 1);
+                        finishing_coord_y.set(height - 1);
                         generated.set(false);
                         solved.set(false);
                     },
@@ -90,13 +108,19 @@ fn App() -> Element {
                     dropdown_options: solve_dropdown_options,
                     height: height,
                     width: width,
-                    starting_coord: starting_coord,
-                    finishing_coord: finishing_coord,
+                    starting_coord_x: starting_coord_x,
+                    starting_coord_y: starting_coord_y,
+                    finishing_coord_x: finishing_coord_x,
+                    finishing_coord_y: finishing_coord_y,
                 }
                 Button::Button {
                 button_text: "Solve maze".to_string(),
-                disabled: !*generated.read() || *solved.read(),
+                disabled: !*generated.read(),
                 onclick: move |_| {
+                    if solved() {
+                            solver_algo.reset(&mut maze);
+                            solver_algo = (BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read()));
+                        }
                     while solver_algo.status != SolverStatus::Done {
                         solver_algo.find_solution(&mut maze);
                     }
