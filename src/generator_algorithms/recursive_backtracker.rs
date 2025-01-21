@@ -1,19 +1,13 @@
 use dioxus::prelude::*;
-use rand::thread_rng;
-use rand::seq::SliceRandom;
 
 use crate::maze::Maze;
-use crate::cell::{CellState, Coord};
+use crate::cell::{Coord};
 use crate::generator_algorithms::generator_helpers::{choose_rand_neighbor, random_grid_position, remove_walls_between_cells, GeneratorAlgo, GeneratorStatus};
-use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
 
 pub struct RecursiveBacktracker {
     stack: Vec<Coord>,
     pub status: GeneratorStatus,
 }
-
-const DIR_X: [isize; 4] = [0, 1, 0, -1];
-const DIR_Y: [isize; 4] = [-1, 0, 1, 0];
 
 impl RecursiveBacktracker {
     pub fn new() -> Self {

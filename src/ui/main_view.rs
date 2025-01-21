@@ -1,12 +1,11 @@
 use dioxus::prelude::*;
 
 use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorAlgo, GeneratorStatus};
-use crate::generator_algorithms::random_prim::RandomPrim;
 use crate::solver_algorithms::solver_helpers::SolverStatus;
 use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
-use crate::ui::components::{Header, DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Dropdown, Button, NumInput};
+use crate::ui::components::{DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
-use crate::cell::{CellState, Coord};
+use crate::cell::Coord;
 
 pub fn launch_app() {
     dioxus::launch(App);

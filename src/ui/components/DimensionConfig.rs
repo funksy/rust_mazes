@@ -3,7 +3,6 @@ use dioxus::prelude::*;
 use crate::maze::Maze;
 use crate::cell::Coord;
 use crate::ui::components::NumInput::NumInput;
-use crate::ui::components::Button::Button;
 
 #[component]
 pub fn DimensionConfig(height: Signal<usize>, width: Signal<usize>) -> Element {

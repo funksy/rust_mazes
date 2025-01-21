@@ -17,18 +17,12 @@ pub struct BreadthFirstSearch {
 
 impl BreadthFirstSearch {
     pub fn new(start: &Coord, finish: &Coord) -> Self {
-        let frontier: VecDeque<Coord> = VecDeque::new();
-        let explored: HashMap<Coord, Coord> = HashMap::new();
-        let start = start.clone();
-        let finish = finish.clone();
-        let current_cell = start.clone();
-
         BreadthFirstSearch {
-            start,
-            finish,
-            frontier,
-            explored,
-            current_cell,
+            start: start.clone(),
+            finish: finish.clone(),
+            frontier: VecDeque::new(),
+            explored: HashMap::new(),
+            current_cell: start.clone(),
             status: SolverStatus::Initialized,
         }
     }
