@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
 
 use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorAlgo, GeneratorStatus};
-use crate::generator_algorithms::random_prim::RandomPrim;
 use crate::solver_algorithms::solver_helpers::SolverStatus;
 use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
-use crate::ui::components::{Header, DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Dropdown, Button, NumInput};
+use crate::solver_algorithms::djikstras::Djikstras;
+use crate::ui::components::{DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
-use crate::cell::{CellState, Coord};
+use crate::cell::Coord;
 
 pub fn launch_app() {
     dioxus::launch(App);
@@ -31,7 +31,7 @@ fn App() -> Element {
     let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
     let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
     let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
-    let mut solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
+    let mut solver_algo = Djikstras::new(&starting_coord.read(), &finishing_coord.read());
 
     use_effect(move || {
         generator_algo_choice();
@@ -56,6 +56,7 @@ fn App() -> Element {
 
     let solve_dropdown_options = vec![
         ("breadth_first_search".to_string(),"Breadth First Search".to_string()),
+        ("djikstras".to_string(),"Djikstra's".to_string()),
     ];
 
     rsx!{
@@ -129,7 +130,7 @@ fn App() -> Element {
                 onclick: move |_| {
                     if solved() {
                             solver_algo.reset(&mut maze);
-                            solver_algo = BreadthFirstSearch::new(&starting_coord.read(), &finishing_coord.read());
+                            solver_algo = Djikstras::new(&starting_coord.read(), &finishing_coord.read());
                         }
                     while solver_algo.status != SolverStatus::Done {
                         solver_algo.find_solution(&mut maze);

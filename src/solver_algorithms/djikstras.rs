@@ -1,4 +1,5 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, BinaryHeap};
+use std::cmp::Ordering;
 
 use dioxus::prelude::*;
 
@@ -6,22 +7,40 @@ use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
 use crate::solver_algorithms::solver_helpers::{reset_solver, SolverStatus};
 
-pub struct BreadthFirstSearch {
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct DistanceToStart {
+    cell_coord: Coord,
+    distance: usize,
+}
+
+impl Ord for DistanceToStart {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.distance.cmp(&self.distance)
+    }
+}
+
+impl PartialOrd for DistanceToStart {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+pub struct Djikstras {
     start: Coord,
     finish: Coord,
-    frontier: VecDeque<Coord>,
     explored: HashMap<Coord, Coord>,
+    frontier: BinaryHeap<DistanceToStart>,
     current_cell: Coord,
     pub status: SolverStatus,
 }
 
-impl BreadthFirstSearch {
+impl Djikstras {
     pub fn new(start: &Coord, finish: &Coord) -> Self {
-        BreadthFirstSearch {
+        Djikstras {
             start: start.clone(),
             finish: finish.clone(),
-            frontier: VecDeque::new(),
             explored: HashMap::new(),
+            frontier: BinaryHeap::new(),
             current_cell: start.clone(),
             status: SolverStatus::Initialized,
         }
@@ -34,12 +53,18 @@ impl BreadthFirstSearch {
             SolverStatus::Initialized => {
                 maze.change_cell_state(&self.start, CellState::Start);
                 maze.change_cell_state(&self.finish, CellState::Finish);
-                self.frontier.push_back(self.start);
+                self.frontier.push(DistanceToStart {
+                    cell_coord: self.start,
+                    distance: 0,
+                });
                 self.status = SolverStatus::InProgress;
             }
             SolverStatus::InProgress => {
-                self.current_cell = self.frontier.pop_front().unwrap();
-                self.add_adjacent_cells_to_frontier(maze, &self.current_cell.clone());
+                println!("Frontier has {} coords", self.frontier.len());
+                let temp: DistanceToStart = self.frontier.pop().unwrap();
+                self.current_cell = temp.cell_coord;
+                let distance: usize = temp.distance;
+                self.add_adjacent_cells_to_frontier(maze, distance);
                 if self.explored.contains_key(&self.finish) {
                     self.current_cell = *self.explored.get(&self.finish).unwrap();
                     self.status = SolverStatus::Solved;
@@ -50,6 +75,7 @@ impl BreadthFirstSearch {
                 self.current_cell = *self.explored.get(&self.current_cell).unwrap();
                 if self.current_cell == self.start {
                     self.status = SolverStatus::Done;
+                    println!("Solved?");
                 }
             }
             SolverStatus::Done => {
@@ -58,37 +84,44 @@ impl BreadthFirstSearch {
         }
     }
 
-    fn add_adjacent_cells_to_frontier(&mut self, maze: &mut Maze, current_cell: &Coord) {
-        let cell = *maze.get_cell_ref(current_cell);
+    fn add_adjacent_cells_to_frontier(&mut self, maze: &mut Maze, distance: usize) {
+        let cell = *maze.get_cell_ref(&self.current_cell);
+
+        println!("In add_adjacent_cells_to_frontier");
+        println!("Looking at cell at x:{}, y:{}", cell.coord().x, cell.coord().y);
 
         if !cell.walls()[0] && !self.explored.contains_key(&Coord{ y: cell.coord().y - 1, x: cell.coord().x }) {
+            print!("Up was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y - 1, x: cell.coord().x };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
-            self.frontier.push_back(new_frontier_cell);
+            self.explored.insert(new_frontier_cell, self.current_cell);
+            self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
         if !cell.walls()[1] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x + 1 }) {
+            print!("Right was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x + 1 };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
-            self.frontier.push_back(new_frontier_cell);
+            self.explored.insert(new_frontier_cell, self.current_cell);
+            self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
         if !cell.walls()[2] && !self.explored.contains_key(&Coord{ y: cell.coord().y + 1, x: cell.coord().x }) {
+            print!("Down was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y + 1, x: cell.coord().x };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
-            self.frontier.push_back(new_frontier_cell);
+            self.explored.insert(new_frontier_cell, self.current_cell);
+            self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
         if !cell.walls()[3] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x - 1 }) {
+            print!("Left was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x - 1 };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
-            self.frontier.push_back(new_frontier_cell);
+            self.explored.insert(new_frontier_cell, self.current_cell);
+            self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
