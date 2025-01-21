@@ -39,7 +39,7 @@ impl BreadthFirstSearch {
             }
             SolverStatus::InProgress => {
                 self.current_cell = self.frontier.pop_front().unwrap();
-                self.add_adjacent_cells(maze, &self.current_cell.clone());
+                self.add_adjacent_cells_to_frontier(maze, &self.current_cell.clone());
                 if self.explored.contains_key(&self.finish) {
                     self.current_cell = *self.explored.get(&self.finish).unwrap();
                     self.status = SolverStatus::Solved;
@@ -58,8 +58,9 @@ impl BreadthFirstSearch {
         }
     }
 
-    fn add_adjacent_cells(&mut self, maze: &mut Maze, current_cell: &Coord) {
+    fn add_adjacent_cells_to_frontier(&mut self, maze: &mut Maze, current_cell: &Coord) {
         let cell = *maze.get_cell_ref(current_cell);
+
         if !cell.walls()[0] && !self.explored.contains_key(&Coord{ y: cell.coord().y - 1, x: cell.coord().x }) {
             let new_frontier_cell = Coord{ y: cell.coord().y - 1, x: cell.coord().x };
             self.explored.insert(new_frontier_cell, current_cell.clone());
