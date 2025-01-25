@@ -9,7 +9,7 @@ use crate::generator_algorithms::generator_helpers::{GeneratorStatus, random_gri
 
 pub struct RandomPrim {
     frontier: IndexSet<Coord>,
-    pub status: GeneratorStatus,
+    status: GeneratorStatus,
 }
 
 impl GeneratorAlgo for RandomPrim {

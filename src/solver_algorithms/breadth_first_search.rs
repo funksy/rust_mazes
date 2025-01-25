@@ -4,7 +4,7 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::solver_algorithms::solver_helpers::{reset_solver, SolverStatus};
+use crate::solver_algorithms::solver_helpers::{reset_solver, SolverAlgo, SolverStatus};
 
 pub struct BreadthFirstSearch {
     start: Coord,
@@ -15,19 +15,8 @@ pub struct BreadthFirstSearch {
     pub status: SolverStatus,
 }
 
-impl BreadthFirstSearch {
-    pub fn new(start: &Coord, finish: &Coord) -> Self {
-        BreadthFirstSearch {
-            start: start.clone(),
-            finish: finish.clone(),
-            frontier: VecDeque::new(),
-            explored: HashMap::new(),
-            current_cell: start.clone(),
-            status: SolverStatus::Initialized,
-        }
-    }
-
-    pub fn find_solution(&mut self, maze: &mut Signal<Maze>) {
+impl SolverAlgo for BreadthFirstSearch {
+    fn find_solution(&mut self, maze: &mut Signal<Maze>) {
         let maze: &mut Maze = &mut maze.write();
 
         match self.status {
@@ -55,6 +44,28 @@ impl BreadthFirstSearch {
             SolverStatus::Done => {
                 panic!("You shouldn't be here");
             }
+        }
+    }
+
+    fn status(&self) -> &SolverStatus {
+        &self.status
+    }
+
+    fn reset(&self, maze: &mut Signal<Maze>) {
+        let maze = &mut maze.write();
+        reset_solver(maze);
+    }
+}
+
+impl BreadthFirstSearch {
+    pub fn new(start: &Coord, finish: &Coord) -> Self {
+        BreadthFirstSearch {
+            start: start.clone(),
+            finish: finish.clone(),
+            frontier: VecDeque::new(),
+            explored: HashMap::new(),
+            current_cell: start.clone(),
+            status: SolverStatus::Initialized,
         }
     }
 
@@ -93,10 +104,5 @@ impl BreadthFirstSearch {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
-    }
-
-    pub fn reset(&self, maze: &mut Signal<Maze>) {
-        let maze = &mut maze.write();
-        reset_solver(maze);
     }
 }

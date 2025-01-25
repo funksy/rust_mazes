@@ -6,7 +6,7 @@ use crate::generator_algorithms::generator_helpers::{choose_rand_neighbor, rando
 
 pub struct RecursiveBacktracker {
     stack: Vec<Coord>,
-    pub status: GeneratorStatus,
+    status: GeneratorStatus,
 }
 
 impl RecursiveBacktracker {

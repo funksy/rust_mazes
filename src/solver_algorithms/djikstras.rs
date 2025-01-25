@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::solver_algorithms::solver_helpers::{reset_solver, SolverStatus};
+use crate::solver_algorithms::solver_helpers::{reset_solver, SolverAlgo, SolverStatus};
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct DistanceToStart {
@@ -31,22 +31,11 @@ pub struct Djikstras {
     explored: HashMap<Coord, Coord>,
     frontier: BinaryHeap<DistanceToStart>,
     current_cell: Coord,
-    pub status: SolverStatus,
+    status: SolverStatus,
 }
 
-impl Djikstras {
-    pub fn new(start: &Coord, finish: &Coord) -> Self {
-        Djikstras {
-            start: start.clone(),
-            finish: finish.clone(),
-            explored: HashMap::new(),
-            frontier: BinaryHeap::new(),
-            current_cell: start.clone(),
-            status: SolverStatus::Initialized,
-        }
-    }
-
-    pub fn find_solution(&mut self, maze: &mut Signal<Maze>) {
+impl SolverAlgo for Djikstras {
+    fn find_solution(&mut self, maze: &mut Signal<Maze>) {
         let maze: &mut Maze = &mut maze.write();
 
         match self.status {
@@ -84,14 +73,31 @@ impl Djikstras {
         }
     }
 
+    fn status(&self) -> &SolverStatus {
+        &self.status
+    }
+
+    fn reset(&self, maze: &mut Signal<Maze>) {
+        let maze = &mut maze.write();
+        reset_solver(maze);
+    }
+}
+impl Djikstras {
+    pub fn new(start: &Coord, finish: &Coord) -> Self {
+        Djikstras {
+            start: start.clone(),
+            finish: finish.clone(),
+            explored: HashMap::new(),
+            frontier: BinaryHeap::new(),
+            current_cell: start.clone(),
+            status: SolverStatus::Initialized,
+        }
+    }
+
     fn add_adjacent_cells_to_frontier(&mut self, maze: &mut Maze, distance: usize) {
         let cell = *maze.get_cell_ref(&self.current_cell);
 
-        println!("In add_adjacent_cells_to_frontier");
-        println!("Looking at cell at x:{}, y:{}", cell.coord().x, cell.coord().y);
-
         if !cell.walls()[0] && !self.explored.contains_key(&Coord{ y: cell.coord().y - 1, x: cell.coord().x }) {
-            print!("Up was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y - 1, x: cell.coord().x };
             self.explored.insert(new_frontier_cell, self.current_cell);
             self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
@@ -100,7 +106,6 @@ impl Djikstras {
             }
         }
         if !cell.walls()[1] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x + 1 }) {
-            print!("Right was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x + 1 };
             self.explored.insert(new_frontier_cell, self.current_cell);
             self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
@@ -109,7 +114,6 @@ impl Djikstras {
             }
         }
         if !cell.walls()[2] && !self.explored.contains_key(&Coord{ y: cell.coord().y + 1, x: cell.coord().x }) {
-            print!("Down was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y + 1, x: cell.coord().x };
             self.explored.insert(new_frontier_cell, self.current_cell);
             self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
@@ -118,7 +122,6 @@ impl Djikstras {
             }
         }
         if !cell.walls()[3] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x - 1 }) {
-            print!("Left was valid.");
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x - 1 };
             self.explored.insert(new_frontier_cell, self.current_cell);
             self.frontier.push(DistanceToStart{ cell_coord: new_frontier_cell, distance: distance + 1 });
@@ -126,10 +129,5 @@ impl Djikstras {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
             }
         }
-    }
-
-    pub fn reset(&self, maze: &mut Signal<Maze>) {
-        let maze = &mut maze.write();
-        reset_solver(maze);
     }
 }

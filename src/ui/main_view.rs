@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorAlgo, GeneratorStatus};
-use crate::solver_algorithms::solver_helpers::SolverStatus;
-use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
-use crate::solver_algorithms::djikstras::Djikstras;
+use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorStatus};
+use crate::solver_algorithms::solver_helpers::{get_solver_algo, SolverStatus};
 use crate::ui::components::{DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
 use crate::cell::Coord;
@@ -31,12 +29,19 @@ fn App() -> Element {
     let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
     let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
     let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
-    let mut solver_algo = Djikstras::new(&starting_coord.read(), &finishing_coord.read());
+    let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
+    let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
 
     use_effect(move || {
         generator_algo_choice();
 
         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
+    });
+
+    use_effect(move || {
+       solver_algo_choice();
+
+        solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
     });
 
     use_effect(move || {
@@ -116,6 +121,7 @@ fn App() -> Element {
                 class: "config-div",
                 SolverConfig::SolverConfig {
                     dropdown_options: solve_dropdown_options,
+                    solver_algo_choice: solver_algo_choice,
                     height: height,
                     width: width,
                     starting_coord_x: starting_coord_x,
@@ -129,13 +135,13 @@ fn App() -> Element {
                 disabled: !*generated.read(),
                 onclick: move |_| {
                     if solved() {
-                            solver_algo.reset(&mut maze);
-                            solver_algo = Djikstras::new(&starting_coord.read(), &finishing_coord.read());
+                            solver_algo.write().reset(&mut maze);
+                            solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
                         }
-                    while solver_algo.status != SolverStatus::Done {
-                        solver_algo.find_solution(&mut maze);
+                    while solver_algo.read().status() != &SolverStatus::Done {
+                        solver_algo.write().find_solution(&mut maze);
                     }
-                    if solver_algo.status == SolverStatus::Done {
+                    if solver_algo.read().status() == &SolverStatus::Done {
                         solved.set(true);
                         }
                     },

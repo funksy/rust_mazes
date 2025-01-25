@@ -1,11 +1,11 @@
 use dioxus::prelude::*;
-use crate::cell::Coord;
 use crate::ui::components::Dropdown::Dropdown;
 use crate::ui::components::NumInput::NumInput;
 
 #[component]
 pub fn SolverConfig(
     dropdown_options: Vec<(String, String)>,
+    solver_algo_choice: Signal<String>,
     height: Signal<usize>,
     width: Signal<usize>,
     starting_coord_x: Signal<usize>,
@@ -25,7 +25,7 @@ pub fn SolverConfig(
                     id: "solver-dropdown",
                     options: dropdown_options,
                     helper_text: "Maze Solver Algo".to_string(),
-                    value: use_signal(|| String::new()),
+                    value: solver_algo_choice,
                     disabled: solved,
                 }
                 div {
