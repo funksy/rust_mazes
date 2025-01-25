@@ -1,7 +1,5 @@
 use dioxus::prelude::*;
 
-use crate::maze::Maze;
-use crate::cell::Coord;
 use crate::ui::components::NumInput::NumInput;
 
 #[component]
