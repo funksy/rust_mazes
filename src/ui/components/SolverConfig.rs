@@ -13,6 +13,7 @@ pub fn SolverConfig(
     finishing_coord_x: Signal<usize>,
     finishing_coord_y: Signal<usize>,
     solved: bool,
+    solver_delay: Signal<usize>,
 ) -> Element {
 
     rsx! {
@@ -70,6 +71,13 @@ pub fn SolverConfig(
                             }
                         }
                     }
+                }
+                label { for: "solver-delay-config", "Render Delay (ms)" },
+                NumInput {
+                    id: "solver-delay-config",
+                    value: solver_delay,
+                    max_val: 100,
+                    min_val: 0,
                 }
             }
         }

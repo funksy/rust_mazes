@@ -9,7 +9,8 @@ indexmap = "2.7.0"
 rand = "0.8.5"
 svg = "0.18.0"
 getrandom = { version = "0.2", features = ["js"] }
-tokio = { version = "1.43.0", features = ["full"] }
+gloo-timers = { version = "0.3.0", features = ["futures"] }
+wasm-bindgen-futures = "0.4.50"
 
 [features]
 default = ["web"]
