@@ -2,6 +2,7 @@ use dioxus::prelude::Signal;
 use crate::cell::{CellState, Coord};
 use crate::maze::Maze;
 use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
+use crate::solver_algorithms::depth_first_search::DepthFirstSearch;
 use crate::solver_algorithms::djikstras::Djikstras;
 
 #[derive(PartialEq)]
@@ -24,6 +25,7 @@ pub fn get_solver_algo(algo: &str, start: &Coord, finish: &Coord) -> Box<dyn Sol
     match algo {
         "breadth_first_search" => Box::new(BreadthFirstSearch::new(start, finish)),
         "djikstras" => Box::new(Djikstras::new(start, finish)),
+        "depth_first_search" => Box::new(DepthFirstSearch::new(start, finish)),
         _ => panic!("you shouldn't be here"),
     }
 }

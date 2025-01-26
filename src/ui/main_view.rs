@@ -65,6 +65,7 @@ fn App() -> Element {
 
     let solve_dropdown_options = vec![
         ("breadth_first_search".to_string(),"Breadth First Search".to_string()),
+        ("depth_first_search".to_string(),"Depth First Search".to_string()),
         ("djikstras".to_string(),"Djikstra's".to_string()),
     ];
 
