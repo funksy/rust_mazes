@@ -9,6 +9,7 @@ pub fn GeneratorConfig(
     height: Signal<usize>, width: Signal<usize>,
     generator_algo_choice: Signal<String>,
     disabled: bool,
+    working: Signal<bool>,
     generator_delay: Signal<usize>
 ) -> Element {
     rsx! {
@@ -22,7 +23,7 @@ pub fn GeneratorConfig(
                     options: dropdown_options,
                     helper_text: "Maze Generator Algo".to_string(),
                     value: generator_algo_choice,
-                    disabled: disabled,
+                    disabled: *working.read(),
                 }
                 div {
                     id: "height-config",
@@ -30,6 +31,7 @@ pub fn GeneratorConfig(
                     NumInput {
                         id: "height-input",
                         value: height,
+                        disabled: *working.read(),
                         max_val: 200,
                         min_val: 2,
                     }
@@ -41,6 +43,7 @@ pub fn GeneratorConfig(
                     NumInput {
                         id: "width-input",
                         value: width,
+                        disabled: *working.read(),
                         max_val: 200,
                         min_val: 2,
                     }
@@ -49,6 +52,7 @@ pub fn GeneratorConfig(
                 NumInput {
                     id: "generator-delay-config",
                     value: generator_delay,
+                    disabled: *working.read(),
                     max_val: 100,
                     min_val: 0,
                 }

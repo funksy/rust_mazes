@@ -17,24 +17,30 @@ static CSS: Asset = asset!("src/ui/assets/main.css");
 fn App() -> Element {
     let height: Signal<usize> = use_signal(|| 10);
     let width: Signal<usize> = use_signal(|| 10);
-
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
-    let mut generated: Signal<bool> = use_signal(|| false);
-    let mut solved: Signal<bool> = use_signal(|| false);
+
+    let mut start_coord_x: Signal<usize> = use_signal(|| 0);
+    let mut start_coord_y: Signal<usize> = use_signal(|| 0);
+    let mut finish_coord_x: Signal<usize> = use_signal(|| width - 1);
+    let mut finish_coord_y: Signal<usize> = use_signal(|| height - 1);
+    let start_coord: Memo<Coord> = use_memo(move || {
+        Coord{ x: start_coord_x(), y: start_coord_y() }
+    });
+    let finish_coord: Memo<Coord> = use_memo(move || {
+        Coord{ x: finish_coord_x(), y: finish_coord_y() }
+    });
 
     let generator_algo_choice: Signal<String> = use_signal(|| "random_prim".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
     let generator_delay: Signal<usize> = use_signal(|| 10);
+    let mut generated: Signal<bool> = use_signal(|| false);
 
-    let mut starting_coord: Signal<Coord> = use_signal(|| Coord { x: 0, y: 0 });
-    let mut finishing_coord: Signal<Coord> = use_signal(|| Coord { x: *width.read() - 1, y: *height.read() - 1 });
-    let mut starting_coord_x: Signal<usize> = use_signal(|| 0);
-    let mut starting_coord_y: Signal<usize> = use_signal(|| 0);
-    let mut finishing_coord_x: Signal<usize> = use_signal(|| width - 1);
-    let mut finishing_coord_y: Signal<usize> = use_signal(|| height - 1);
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
-    let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
+    let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
     let solver_delay: Signal<usize> = use_signal(|| 10);
+    let mut solved: Signal<bool> = use_signal(|| false);
+
+    let mut working: Signal<bool> = use_signal(|| false);
 
     use_effect(move || {
         generator_algo_choice();
@@ -42,17 +48,8 @@ fn App() -> Element {
     });
 
     use_effect(move || {
-       solver_algo_choice();
-        solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
-    });
-
-    use_effect(move || {
-        starting_coord_x();
-        starting_coord_y();
-        finishing_coord_x();
-        finishing_coord_y();
-        starting_coord.set(Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
-        finishing_coord.set(Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
+        solver_algo_choice();
+        solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
     });
 
     rsx!{
@@ -72,19 +69,21 @@ fn App() -> Element {
                     width: width,
                     disabled: false,
                     generator_delay: generator_delay,
+                    working: working,
                 }
                 Button::Button {
                     button_text: "Generate maze".to_string(),
-                    disabled: false,
+                    disabled: *working.read(),
                     onclick: move |_| {
                         maze.set(Maze::new(*height.read(), *width.read()));
-                        starting_coord_x.set(0);
-                        starting_coord_y.set(0);
-                        finishing_coord_x.set(width - 1);
-                        finishing_coord_y.set(height - 1);
+                        start_coord_x.set(0);
+                        start_coord_y.set(0);
+                        finish_coord_x.set(width - 1);
+                        finish_coord_y.set(height - 1);
                         generated.set(false);
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
                         solved.set(false);
+                        working.set(true);
 
                         wasm_bindgen_futures::spawn_local(async move {
                             while generator_algo.read().status() != &GeneratorStatus::Done {
@@ -95,6 +94,7 @@ fn App() -> Element {
                             }
                             if generator_algo.read().status() == &GeneratorStatus::Done {
                                 generated.set(true);
+                                working.set(false);
                             }
                         });
                     }
@@ -108,21 +108,23 @@ fn App() -> Element {
                     solver_algo_choice: solver_algo_choice,
                     height: height,
                     width: width,
-                    starting_coord_x: starting_coord_x,
-                    starting_coord_y: starting_coord_y,
-                    finishing_coord_x: finishing_coord_x,
-                    finishing_coord_y: finishing_coord_y,
-                    solved: *solved.read(),
+                    start_coord_x: start_coord_x,
+                    start_coord_y: start_coord_y,
+                    finish_coord_x: finish_coord_x,
+                    finish_coord_y: finish_coord_y,
                     solver_delay: solver_delay,
+                    working: working,
                 }
                 Button::Button {
                     button_text: "Solve maze".to_string(),
-                    disabled: !*generated.read(),
+                    disabled: !*generated.read() || *working.read(),
                     onclick: move |_| {
+                        working.set(true);
+
                         wasm_bindgen_futures::spawn_local(async move {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
-                                solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
+                                solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
                             }
                             while solver_algo.read().status() != &SolverStatus::Done {
                                 solver_algo.write().find_solution(&mut maze);
@@ -132,6 +134,7 @@ fn App() -> Element {
                             }
                             if solver_algo.read().status() == &SolverStatus::Done {
                                 solved.set(true);
+                                working.set(false);
                             }
                         });
                     }
