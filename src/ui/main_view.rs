@@ -2,9 +2,9 @@ use dioxus::prelude::*;
 use gloo_timers::future::TimeoutFuture;
 use wasm_bindgen_futures;
 
-use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorStatus};
-use crate::solver_algorithms::solver_helpers::{get_solver_algo, SolverStatus};
-use crate::ui::components::{DimensionConfig, GeneratorConfig, SolverConfig, MazeRender, Button};
+use crate::generator_algorithms::generator_helpers::{get_generator_algo, get_generator_options, GeneratorStatus};
+use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_options, SolverStatus};
+use crate::ui::components::{GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
 use crate::cell::Coord;
 
@@ -38,13 +38,11 @@ fn App() -> Element {
 
     use_effect(move || {
         generator_algo_choice();
-
         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
     });
 
     use_effect(move || {
        solver_algo_choice();
-
         solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &starting_coord.read(), &finishing_coord.read()));
     });
 
@@ -53,21 +51,9 @@ fn App() -> Element {
         starting_coord_y();
         finishing_coord_x();
         finishing_coord_y();
-
         starting_coord.set(Coord { x: *starting_coord_x.read(), y: *starting_coord_y.read() });
         finishing_coord.set(Coord { x: *finishing_coord_x.read(), y: *finishing_coord_y.read() });
     });
-
-    let gen_dropdown_options = vec![
-        ("random_prim".to_string(),"Random Prim".to_string()),
-        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string())
-    ];
-
-    let solve_dropdown_options = vec![
-        ("breadth_first_search".to_string(),"Breadth First Search".to_string()),
-        ("depth_first_search".to_string(),"Depth First Search".to_string()),
-        ("djikstras".to_string(),"Djikstra's".to_string()),
-    ];
 
     rsx!{
         document::Stylesheet { href: CSS }
@@ -77,19 +63,21 @@ fn App() -> Element {
             id: "sidebar",
             h1 { "Mazer" },
             div {
-                id: "maze-config",
+                id: "generator-config",
                 class: "config-div",
-                DimensionConfig::DimensionConfig {
+                GeneratorConfig::GeneratorConfig {
+                    dropdown_options: get_generator_options(),
+                    generator_algo_choice: generator_algo_choice,
                     height: height,
                     width: width,
+                    disabled: false,
+                    generator_delay: generator_delay,
                 }
                 Button::Button {
-                    button_text: "New Maze",
+                    button_text: "Generate maze".to_string(),
                     disabled: false,
                     onclick: move |_| {
                         maze.set(Maze::new(*height.read(), *width.read()));
-                        starting_coord.set(Coord { x: 0, y: 0 });
-                        finishing_coord.set(Coord { x: *width.read() - 1, y: *height.read() - 1 });
                         starting_coord_x.set(0);
                         starting_coord_y.set(0);
                         finishing_coord_x.set(width - 1);
@@ -97,22 +85,7 @@ fn App() -> Element {
                         generated.set(false);
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
                         solved.set(false);
-                    },
-                }
-            }
-            div {
-                id: "generator-config",
-                class: "config-div",
-                GeneratorConfig::GeneratorConfig {
-                    dropdown_options: gen_dropdown_options,
-                    generator_algo_choice: generator_algo_choice,
-                    generated: *generated.read(),
-                    generator_delay: generator_delay,
-                }
-                Button::Button {
-                    button_text: "Generate maze".to_string(),
-                    disabled: *generated.read(),
-                    onclick: move |_| {
+
                         wasm_bindgen_futures::spawn_local(async move {
                             while generator_algo.read().status() != &GeneratorStatus::Done {
                                 generator_algo.write().create_maze(&mut maze);
@@ -131,7 +104,7 @@ fn App() -> Element {
                 id: "solver-config",
                 class: "config-div",
                 SolverConfig::SolverConfig {
-                    dropdown_options: solve_dropdown_options,
+                    dropdown_options: get_solver_options(),
                     solver_algo_choice: solver_algo_choice,
                     height: height,
                     width: width,

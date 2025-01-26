@@ -21,6 +21,14 @@ pub trait SolverAlgo {
     fn reset(&self, maze: &mut Signal<Maze>);
 }
 
+pub fn get_solver_options() -> Vec<(String, String)> {
+    vec![
+        ("breadth_first_search".to_string(),"Breadth First Search".to_string()),
+        ("depth_first_search".to_string(),"Depth First Search".to_string()),
+        ("djikstras".to_string(),"Djikstra's".to_string()),
+    ]
+}
+
 pub fn get_solver_algo(algo: &str, start: &Coord, finish: &Coord) -> Box<dyn SolverAlgo> {
     match algo {
         "breadth_first_search" => Box::new(BreadthFirstSearch::new(start, finish)),

@@ -20,6 +20,13 @@ pub trait GeneratorAlgo {
     fn status(&self) -> &GeneratorStatus;
 }
 
+pub fn get_generator_options() -> Vec<(String, String)> {
+    vec![
+        ("random_prim".to_string(),"Random Prim".to_string()),
+        ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string())
+    ]
+}
+
 
 pub fn get_generator_algo(algo: &str) -> Box<dyn GeneratorAlgo> {
     match algo {
