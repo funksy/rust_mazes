@@ -8,12 +8,12 @@ pub fn SolverConfig(
     solver_algo_choice: Signal<String>,
     height: Signal<usize>,
     width: Signal<usize>,
-    starting_coord_x: Signal<usize>,
-    starting_coord_y: Signal<usize>,
-    finishing_coord_x: Signal<usize>,
-    finishing_coord_y: Signal<usize>,
-    solved: bool,
+    start_coord_x: Signal<usize>,
+    start_coord_y: Signal<usize>,
+    finish_coord_x: Signal<usize>,
+    finish_coord_y: Signal<usize>,
     solver_delay: Signal<usize>,
+    working: Signal<bool>,
 ) -> Element {
 
     rsx! {
@@ -27,45 +27,49 @@ pub fn SolverConfig(
                     options: dropdown_options,
                     helper_text: "Maze Solver Algo".to_string(),
                     value: solver_algo_choice,
-                    disabled: solved,
+                    disabled: *working.read(),
                 }
                 div {
                     id: "start-finish-config",
                     div {
                         p { class: "coord-label", "Starting Cell" }
                         div {
-                            id: "starting-coord-config",
-                            label { for: "starting-coord-x", "x:" },
+                            id: "start-coord-config",
+                            label { for: "start-coord-x", "x:" },
                             NumInput {
-                                id: "starting-coord-x",
-                                value: starting_coord_x,
+                                id: "start-coord-x",
+                                value: start_coord_x,
+                                disabled: *working.read(),
                                 max_val: *width.read() - 1,
                                 min_val: 0,
                             }
-                            label { for: "starting-coord-y", "y:" },
+                            label { for: "start-coord-y", "y:" },
                             NumInput {
-                                id: "starting-coord-y",
-                                value: starting_coord_y,
+                                id: "start-coord-y",
+                                value: start_coord_y,
+                                disabled: *working.read(),
                                 max_val: *height.read() - 1,
                                 min_val: 0,
                             }
                         }
                     }
                     div {
-                        label { for: "finishing-coord-x", "Finishing Cell" },
+                        label { for: "finish-coord-x", "Finishing Cell" },
                         div {
-                            id: "finishing-coord-config",
-                            label { for: "finishing-coord-x", "x:" },
+                            id: "finish-coord-config",
+                            label { for: "finish-coord-x", "x:" },
                             NumInput {
-                                id: "finishing-coord-x",
-                                value: finishing_coord_x,
+                                id: "finish-coord-x",
+                                value: finish_coord_x,
+                                disabled: *working.read(),
                                 max_val: *width.read() - 1,
                                 min_val: 0,
                             }
-                            label { for: "finishing-coord-y", "y:" },
+                            label { for: "finish-coord-y", "y:" },
                             NumInput {
-                                id: "finishing-coord-y",
-                                value: finishing_coord_y,
+                                id: "finish-coord-y",
+                                value: finish_coord_y,
+                                disabled: *working.read(),
                                 max_val: *height.read() - 1,
                                 min_val: 0,
                             }
@@ -76,6 +80,7 @@ pub fn SolverConfig(
                 NumInput {
                     id: "solver-delay-config",
                     value: solver_delay,
+                    disabled: *working.read(),
                     max_val: 100,
                     min_val: 0,
                 }

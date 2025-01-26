@@ -136,13 +136,13 @@ legend {
     width: 40px;
 }
 
-#starting-coord-config {
+#start-coord-config {
     display: flex;
     flex-flow: row;
     justify-content: center;
 }
 
-#finishing-coord-config {
+#finish-coord-config {
     display: flex;
     flex-flow: row;
     justify-content: center;
