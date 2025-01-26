@@ -32,7 +32,7 @@ pub fn SolverConfig(
                 div {
                     id: "start-finish-config",
                     div {
-                        p { class: "coord-label", "Starting Cell" }
+                        label { for: "start-coord-config", "Starting Cell" }
                         div {
                             id: "start-coord-config",
                             label { for: "start-coord-x", "x:" },
@@ -54,7 +54,7 @@ pub fn SolverConfig(
                         }
                     }
                     div {
-                        label { for: "finish-coord-x", "Finishing Cell" },
+                        label { for: "finish-coord-config", "Finishing Cell" },
                         div {
                             id: "finish-coord-config",
                             label { for: "finish-coord-x", "x:" },

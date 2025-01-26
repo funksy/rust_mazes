@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::maze::Maze;
-use crate::cell::{Coord};
+use crate::cell::{CellState, Coord};
 use crate::generator_algorithms::generator_helpers::{choose_rand_neighbor, random_grid_position, remove_walls_between_cells, GeneratorAlgo, GeneratorStatus};
 
 pub struct RecursiveBacktracker {

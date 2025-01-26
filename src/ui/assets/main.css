@@ -39,12 +39,17 @@ form {
 }
 
 label {
-    padding: 4px;
+    font-size: 14px;
+    margin: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    align-self: center;
 }
 
 input {
     padding: 4px;
-    margin: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 button {
@@ -54,6 +59,7 @@ button {
 }
 
 select {
+    text-align: center;
     padding: 4px;
     margin: 4px;
 }
@@ -73,6 +79,7 @@ fieldset {
 }
 
 legend {
+    text-align: center;
     padding-left: 4px;
     padding-right: 4px;
     font-size: larger;
@@ -83,25 +90,20 @@ legend {
     flex-flow: column;
 }
 
-#dimension-config {
-    display: flex;
-    flex-flow: column;
-}
-
 #height-config {
     display: flex;
     flex-flow: row;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: start;
-    width: 150px;
+    width: 100px;
 }
 
 #width-config {
     display: flex;
     flex-flow: row;
-    justify-content: space-evenly;
+    justify-content: center;
     align-items: start;
-    width: 150px;
+    width: 100px;
 }
 
 #generator-config {

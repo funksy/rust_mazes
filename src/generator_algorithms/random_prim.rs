@@ -58,25 +58,25 @@ impl RandomPrim {
 
         if origin.y > 0 {
             if maze.get_cell_ref(&Coord{ y: origin.y - 1, x: origin.x }).visited() == false {
-                maze.change_cell_state(&Coord{ y: origin.y - 1, x: origin.x }, CellState::Frontier);
+                // maze.change_cell_state(&Coord{ y: origin.y - 1, x: origin.x }, CellState::Frontier);
                 new_frontier_cells.push(Coord{ y: origin.y - 1, x: origin.x })
             }
         }
         if origin.y < maze.height() - 1 {
             if maze.get_cell_ref(&Coord{ y: origin.y + 1, x: origin.x }).visited() == false {
-                maze.change_cell_state(&Coord{ y: origin.y + 1, x: origin.x }, CellState::Frontier);
+                // maze.change_cell_state(&Coord{ y: origin.y + 1, x: origin.x }, CellState::Frontier);
                 new_frontier_cells.push(Coord{ y: origin.y + 1, x: origin.x });
             }
         }
         if origin.x > 0 {
             if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x - 1 }).visited() == false {
-                maze.change_cell_state(&Coord{ y: origin.y, x: origin.x - 1 }, CellState::Frontier);
+                // maze.change_cell_state(&Coord{ y: origin.y, x: origin.x - 1 }, CellState::Frontier);
                 new_frontier_cells.push(Coord{ y: origin.y, x: origin.x - 1 });
             }
         }
         if origin.x < maze.width() - 1 {
             if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x + 1 }).visited() == false {
-                maze.change_cell_state(&Coord{ y: origin.y, x: origin.x + 1 }, CellState::Frontier);
+                // maze.change_cell_state(&Coord{ y: origin.y, x: origin.x + 1 }, CellState::Frontier);
                 new_frontier_cells.push(Coord{ y: origin.y, x: origin.x + 1 });
             }
         }
