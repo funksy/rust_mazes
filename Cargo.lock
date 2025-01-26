@@ -2520,6 +2520,7 @@ dependencies = [
  "indexmap 2.7.0",
  "rand 0.8.5",
  "svg",
+ "tokio",
 ]
 
 [[package]]
@@ -4039,6 +4040,7 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2",

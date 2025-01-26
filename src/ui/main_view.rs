@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use tokio::time::{sleep, Duration};
 
 use crate::generator_algorithms::generator_helpers::{get_generator_algo, GeneratorStatus};
 use crate::solver_algorithms::solver_helpers::{get_solver_algo, SolverStatus};
@@ -108,7 +109,10 @@ fn App() -> Element {
                 disabled: *generated.read(),
                 onclick: move |_| {
                     while generator_algo.read().status() != &GeneratorStatus::Done {
-                        generator_algo.write().create_maze(&mut maze);
+                        spawn(async move {
+                            generator_algo.write().create_maze(&mut maze);
+                            sleep(Duration::from_millis(50)).await;
+                        });
                     }
                     if generator_algo.read().status() == &GeneratorStatus::Done {
                         generated.set(true);
