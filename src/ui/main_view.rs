@@ -82,7 +82,6 @@ fn App() -> Element {
                         finish_coord_y.set(height - 1);
                         generated.set(false);
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
-                        solved.set(false);
                         working.set(true);
 
                         wasm_bindgen_futures::spawn_local(async move {
@@ -125,6 +124,7 @@ fn App() -> Element {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
                                 solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
+                                solved.set(false);
                             }
                             while solver_algo.read().status() != &SolverStatus::Done {
                                 solver_algo.write().find_solution(&mut maze);
