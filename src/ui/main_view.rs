@@ -15,8 +15,8 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let height: Signal<usize> = use_signal(|| 10);
-    let width: Signal<usize> = use_signal(|| 10);
+    let height: Signal<usize> = use_signal(|| 4);
+    let width: Signal<usize> = use_signal(|| 4);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
 
     let mut start_coord_x: Signal<usize> = use_signal(|| 0);

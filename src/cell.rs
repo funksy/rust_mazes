@@ -5,7 +5,7 @@ pub struct Cell {
     coord: Coord,
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
 pub struct Coord {
     pub y: usize,
     pub x: usize

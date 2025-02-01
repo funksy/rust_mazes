@@ -23,7 +23,7 @@ pub trait GeneratorAlgo {
 
 pub fn get_generator_options() -> Vec<(String, String)> {
     vec![
-        ("ellers".to_string(), "Eller's".to_string()),
+        // ("ellers".to_string(), "Eller's".to_string()),
         ("random_prim".to_string(),"Random Prim".to_string()),
         ("recursive_backtracker".to_string(),"Recursive Backtracker".to_string())
     ]
@@ -32,7 +32,7 @@ pub fn get_generator_options() -> Vec<(String, String)> {
 
 pub fn get_generator_algo(algo: &str) -> Box<dyn GeneratorAlgo> {
     match algo {
-        "ellers" => Box::new(Ellers::new()),
+        // "ellers" => Box::new(Ellers::new()),
         "random_prim" => Box::new(RandomPrim::new()),
         "recursive_backtracker" => Box::new(RecursiveBacktracker::new()),
         _ => panic!("you shouldn't be here"),
