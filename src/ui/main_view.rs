@@ -30,7 +30,7 @@ fn App() -> Element {
         Coord{ x: finish_coord_x(), y: finish_coord_y() }
     });
 
-    let generator_algo_choice: Signal<String> = use_signal(|| "random_prim".to_string());
+    let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
     let generator_delay: Signal<usize> = use_signal(|| 10);
     let mut generated: Signal<bool> = use_signal(|| false);
