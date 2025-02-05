@@ -14,45 +14,14 @@ pub struct Ellers {
     status: GeneratorStatus,
 }
 
-// impl GeneratorAlgo for Ellers {
-//     fn create_maze(&mut self, maze: &mut Signal<Maze>) {
-//         let maze: &mut Maze = &mut maze.write();
-//
-//         match self.status {
-//             GeneratorStatus::Initialized => {
-//                 self.process_maze_row(maze);
-//                 self.status = GeneratorStatus::InProgress;
-//             }
-//             GeneratorStatus::InProgress => {
-//                 self.process_maze_row(maze);
-//                 if self.current_row == maze.width() {
-//                     self.status = GeneratorStatus::Done;
-//                 }
-//             }
-//             GeneratorStatus::Done => {
-//                 panic!("You shouldn't be here");
-//             }
-//         }
-//     }
-//
-//     fn status(&self) -> &GeneratorStatus {
-//         &self.status
-//     }
-// }
+enum AddCell {
+    NewSet,
+    AddToSet,
+}
 
-impl Ellers {
-    pub fn new() -> Self {
-        Ellers {
-            current_row: 0,
-            set_identifier: 0,
-            sets: HashMap::new(),
-            cells: HashMap::new(),
-            status: GeneratorStatus::Initialized,
-        }
-    }
-
-    pub fn create_maze(&mut self, maze: &mut Maze) {
-        // let maze: &mut Maze = &mut maze.write();
+impl GeneratorAlgo for Ellers {
+    fn create_maze(&mut self, maze: &mut Signal<Maze>) {
+        let maze: &mut Maze = &mut maze.write();
 
         match self.status {
             GeneratorStatus::Initialized => {
@@ -71,141 +40,131 @@ impl Ellers {
         }
     }
 
-    pub fn status(&self) -> &GeneratorStatus {
+    fn status(&self) -> &GeneratorStatus {
         &self.status
+    }
+}
+
+impl Ellers {
+    pub fn new() -> Self {
+        Ellers {
+            current_row: 0,
+            set_identifier: 0,
+            sets: HashMap::new(),
+            cells: HashMap::new(),
+            status: GeneratorStatus::Initialized,
+        }
     }
 
     fn process_maze_row(&mut self, maze: &mut Maze) {
-        //for each cell, if it does not already belong to a set, assign it a new set
+        let mut rng = rand::thread_rng();
+
         for x in 0..maze.width() {
-            let cell_coord = &Coord{ x, y: self.current_row };
-            if !self.cells.contains_key(&cell_coord) {
-                maze.visit_cell(&cell_coord);
-                self.add_new_cell(&cell_coord, false, 0);
-            }
-        }
-
-        //for each pair of cells that belong to different sets, randomly join them
-        for x in 0..(maze.width() - 1) {
             let current_cell = &Coord{ x, y: self.current_row };
-            let next_cell = &Coord{ x: x + 1, y: self.current_row };
+            if !self.cells.contains_key(current_cell) {
+                maze.visit_cell(current_cell);
+                self.add_new_cell(current_cell, 0, AddCell::NewSet);
+            }
 
-            if self.cells.get(current_cell) != self.cells.get(next_cell) {
-                if self.randomly_join_cells(current_cell, next_cell, 50) {
-                    // remove_walls_between_cells(maze, current_cell,1);
-                    let first_set_id = match self.cells.get(current_cell).cloned() {
-                        Some(first_set_id) => first_set_id,
-                        None => panic!("There should be an entry here, line 96")
-                    };
-                    let second_set_id = match self.cells.get(next_cell).cloned() {
-                        Some(second_set_id) => second_set_id,
-                        None => panic!("There should be an entry here, line 100")
-                    };
-                    self.merge_sets(first_set_id, second_set_id);
+            if x > 0 {
+                let previous_cell = &Coord{ x: x - 1, y: self.current_row };
+                if self.cells.get(current_cell) != self.cells.get(previous_cell) && 50 > rng.gen_range(0..100) {
+                    self.merge_cell_sets(current_cell, previous_cell);
+                    remove_walls_between_cells(maze, current_cell, 3);
                 }
             }
         }
 
-        //if this is not the last row, process vertical connections
-        if self.current_row < maze.width() - 1 {
-            let mut vert_connections: Vec<usize> = Vec::new();
+        if self.current_row < maze.height() - 1 {
+            let mut sets_without_vert_connection: Vec<usize> = Vec::with_capacity(maze.width());
+            self.sets.iter().for_each(|(set_id, _)| {
+               sets_without_vert_connection.push(*set_id);
+            });
+
             for x in 0..maze.width() {
-                let current_cell = &Coord{ x, y: self.current_row };
-                let next_cell = &Coord{ x, y: self.current_row + 1 };
-
-
-
-                if self.randomly_join_cells(current_cell, next_cell, 50) {
-                    let set_id = match self.cells.get(current_cell).cloned() {
-                        Some(first_set_id) => first_set_id,
-                        None => panic!("There should be an entry here, line 95")
-                    };
-                    maze.visit_cell(&next_cell);
+                if 50 > rng.gen_range(0..100) {
+                    let current_cell = &Coord{ x, y: self.current_row };
+                    let next_cell = &Coord{ x, y: self.current_row + 1 };
+                    let current_set_id = *self.cells.get(current_cell).expect("No self.cells entry for current_cell");
+                    maze.visit_cell(next_cell);
+                    self.add_new_cell(next_cell, current_set_id, AddCell::AddToSet);
                     remove_walls_between_cells(maze, current_cell, 2);
-                    vert_connections.push(set_id);
-                }
-            }
-
-            let mut sets_without_vert_connection: Vec<(Coord, usize)> = Vec::new();
-            for (set, cells) in self.sets.iter_mut() {
-                if !vert_connections.contains(set) {
-                    let mut current_cell = &cells[0];
-
-                    while current_cell.y != self.current_row {
-                        current_cell = match cells.choose(&mut rand::thread_rng()) {
-                            Some(cell_coord) => cell_coord,
-                            None => panic!("There should be an entry here, line 113")
-                        };
+                    if let Some(index) = sets_without_vert_connection.iter().position(|i| *i == current_set_id) {
+                        sets_without_vert_connection.remove(index);
                     }
-                    let next_cell = Coord{ x: current_cell.x, y: current_cell.y + 1 };
-                    sets_without_vert_connection.push((next_cell, set.clone()));
                 }
             }
 
-            sets_without_vert_connection.iter().for_each(|(cell, set_id)| {
-                maze.visit_cell(cell);
-                remove_walls_between_cells(maze, cell, 2);
-                self.add_new_cell(cell, true, set_id.clone());
+            sets_without_vert_connection.iter().for_each(|set_id| {
+                let cell_vec = match self.sets.get(set_id) {
+                    Some(cell_vec) => cell_vec,
+                    None => panic!("No self.sets entry for set_id")
+                };
+                let mut cells_on_current_row: Vec<Coord> = Vec::new();
+                cell_vec.iter().for_each(|cell| {
+                   if cell.y == self.current_row {
+                       cells_on_current_row.push(*cell);
+                   }
+                });
+                let random_cell = match cells_on_current_row.choose(&mut rand::thread_rng()) {
+                    Some(cell) => cell,
+                    None => panic!("No cells in cells_on_current_row"),
+                };
+                let next_cell = &Coord{ x: random_cell.x, y: self.current_row + 1 };
+                maze.visit_cell(next_cell);
+                self.add_new_cell(next_cell, *set_id, AddCell::AddToSet);
+                remove_walls_between_cells(maze, random_cell, 2);
             });
         }
-        //if this is the last row, make sure all cells are merged into the same set
 
         else {
             for x in 0..maze.width() - 1 {
-                let current_cell = &Coord{ x, y: self.current_row };
-                let next_cell = &Coord{ x: x + 1, y: self.current_row };
+                let current_cell = &Coord { x, y: self.current_row };
+                let next_cell = &Coord { x: x + 1, y: self.current_row };
 
                 if self.cells.get(current_cell) != self.cells.get(next_cell) {
-                    self.randomly_join_cells(current_cell, next_cell, 100);
+                    self.merge_cell_sets(current_cell, next_cell);
                     remove_walls_between_cells(maze, current_cell, 1);
-                    let first_set_id = match self.cells.get(current_cell).cloned() {
-                        Some(first_set_id) => first_set_id,
-                        None => panic!("There should be an entry here, line 163")
-                    };
-                    let second_set_id = match self.cells.get(next_cell).cloned() {
-                        Some(second_set_id) => second_set_id,
-                        None => panic!("There should be an entry here, line 167")
-                    };
-                    self.merge_sets(first_set_id, second_set_id);
                 }
             }
         }
+
         self.current_row += 1;
     }
 
-    fn add_new_cell(&mut self, cell_coord: &Coord, existing_set: bool, set_id: usize) {
-        match existing_set {
-            true => {
-                self.sets.entry(set_id).and_modify(|existing_cells| existing_cells.push(cell_coord.clone()));
-                self.cells.insert(cell_coord.clone(), set_id);
-            },
-            false => {
-                self.sets.insert(self.set_identifier, vec![cell_coord.clone()]);
-                self.cells.insert(cell_coord.clone(), self.set_identifier);
+    fn add_new_cell(&mut self, cell_coord: &Coord, set_id: usize, add_type: AddCell) {
+        match add_type {
+            AddCell::NewSet => {
+                self.sets.insert(self.set_identifier, vec![*cell_coord]);
+                self.cells.insert(*cell_coord, self.set_identifier);
                 self.set_identifier += 1;
+            },
+            AddCell::AddToSet => {
+                self.sets.entry(set_id).and_modify(|existing_cells| existing_cells.push(*cell_coord));
+                self.cells.insert(*cell_coord, set_id);
             }
         }
     }
 
-    fn randomly_join_cells(&mut self, first_cell: &Coord, second_cell: &Coord, weight: usize) -> bool {
-        if weight > rand::thread_rng().gen_range(0..100) {
-            let first_set_id = match self.cells.get(first_cell).cloned() {
-                Some(first_set_id) => first_set_id,
-                None => panic!("There should be an entry here, line 190")
-            };
-            self.add_new_cell(second_cell, true, first_set_id);
-            true
-        } else {
-            false
-        }
-    }
-
-    fn merge_sets(&mut self, first_set: usize, second_set: usize) {
-        let second_set_cells = match self.sets.get(&second_set).cloned() {
-            Some(second_set_cells) => second_set_cells,
-            None => panic!("There should be an entry here, line 204, second:{second_set}")
+    fn merge_cell_sets(&mut self, first_cell: &Coord, second_cell: &Coord) {
+        let first_set_id = match self.cells.get(first_cell).copied() {
+            Some(first_set_id) => first_set_id,
+            None => panic!("No self.cells entry for first_cell")
         };
-        self.sets.entry(first_set).and_modify(|existing_cells| existing_cells.extend(second_set_cells));
-        self.sets.remove(&second_set);
+        let second_set_id = match self.cells.get(second_cell).copied() {
+            Some(second_set_id) => second_set_id,
+            None => panic!("No self.cells entry for second_cell")
+        };
+        let second_set_cells = match self.sets.get(&second_set_id).cloned() {
+            Some(second_set_cells) => second_set_cells,
+            None => panic!("No self.sets entry for second_set_id")
+        };
+
+        second_set_cells.iter().for_each(|cell_coord| {
+            self.cells.insert(*cell_coord, first_set_id);
+        });
+
+        self.sets.entry(first_set_id).and_modify(|existing_cells| existing_cells.extend(second_set_cells));
+        self.sets.remove(&second_set_id);
     }
 }
