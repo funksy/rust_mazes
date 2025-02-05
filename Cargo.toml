@@ -11,6 +11,7 @@ svg = "0.18.0"
 getrandom = { version = "0.2", features = ["js"] }
 gloo-timers = { version = "0.3.0", features = ["futures"] }
 wasm-bindgen-futures = "0.4.50"
+rayon = "1.10.0"
 
 [features]
 default = ["web"]

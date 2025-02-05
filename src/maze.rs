@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use rayon::prelude::*;
 use crate::cell::{Cell, CellState, Coord};
 
 #[derive(PartialEq, Clone)]
@@ -179,8 +180,8 @@ impl Maze {
         };
 
         let containing_wall = match walls_vec[walls_vec_i]
-            .iter()
-            .find(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
+            .par_iter()
+            .find_any(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
             .cloned() {
             Some(wall) => wall,
             None => panic!("Containing wall doesn't exist."),

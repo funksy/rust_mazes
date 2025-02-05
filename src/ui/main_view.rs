@@ -15,8 +15,8 @@ pub fn launch_app() {
 static CSS: Asset = asset!("src/ui/assets/main.css");
 
 fn App() -> Element {
-    let height: Signal<usize> = use_signal(|| 10);
-    let width: Signal<usize> = use_signal(|| 10);
+    let height: Signal<usize> = use_signal(|| 4);
+    let width: Signal<usize> = use_signal(|| 4);
     let mut maze: Signal<Maze> = use_signal(|| Maze::new(*height.read(), *width.read()));
 
     let mut start_coord_x: Signal<usize> = use_signal(|| 0);
@@ -30,7 +30,7 @@ fn App() -> Element {
         Coord{ x: finish_coord_x(), y: finish_coord_y() }
     });
 
-    let generator_algo_choice: Signal<String> = use_signal(|| "random_prim".to_string());
+    let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
     let generator_delay: Signal<usize> = use_signal(|| 10);
     let mut generated: Signal<bool> = use_signal(|| false);
@@ -82,7 +82,6 @@ fn App() -> Element {
                         finish_coord_y.set(height - 1);
                         generated.set(false);
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
-                        solved.set(false);
                         working.set(true);
 
                         wasm_bindgen_futures::spawn_local(async move {
@@ -125,6 +124,7 @@ fn App() -> Element {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
                                 solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
+                                solved.set(false);
                             }
                             while solver_algo.read().status() != &SolverStatus::Done {
                                 solver_algo.write().find_solution(&mut maze);
