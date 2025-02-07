@@ -145,22 +145,16 @@ impl Ellers {
     }
 
     fn merge_cell_sets(&mut self, first_cell: &Coord, second_cell: &Coord) {
-        let first_set_id = match self.cells.get(first_cell).copied() {
-            Some(first_set_id) => first_set_id,
-            None => panic!("No self.cells entry for first_cell")
-        };
-        let second_set_id = match self.cells.get(second_cell).copied() {
-            Some(second_set_id) => second_set_id,
-            None => panic!("No self.cells entry for second_cell")
-        };
-        let second_set_cells = match self.sets.get(&second_set_id).cloned() {
-            Some(second_set_cells) => second_set_cells,
-            None => panic!("No self.sets entry for second_set_id")
-        };
+        let first_set_id = *self.cells.get(first_cell).
+            expect("No self.cells entry for first_cell");
+        let second_set_id = *self.cells.get(second_cell).
+            expect("No self.cells entry for second_cell");
+        let second_set_cells = self.sets.remove(&second_set_id)
+            .expect("No self.sets entry for second_set_id");
 
-        second_set_cells.iter().for_each(|cell_coord| {
-            self.cells.insert(*cell_coord, first_set_id);
-        });
+        for cell in &second_set_cells {
+            self.cells.insert(*cell, first_set_id);
+        }
 
         self.sets.entry(first_set_id).and_modify(|existing_cells| existing_cells.extend(second_set_cells));
         self.sets.remove(&second_set_id);

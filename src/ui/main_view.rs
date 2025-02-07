@@ -75,7 +75,7 @@ fn App() -> Element {
                     button_text: "Generate maze".to_string(),
                     disabled: *working.read(),
                     onclick: move |_| {
-                        maze.set(Maze::new(*height.read(), *width.read()));
+
                         start_coord_x.set(0);
                         start_coord_y.set(0);
                         finish_coord_x.set(width - 1);
@@ -85,6 +85,9 @@ fn App() -> Element {
                         working.set(true);
 
                         wasm_bindgen_futures::spawn_local(async move {
+                            maze.set(Maze::new(*height.read(), *width.read()));
+                            TimeoutFuture::new(200).await;
+
                             while generator_algo.read().status() != &GeneratorStatus::Done {
                                 generator_algo.write().create_maze(&mut maze);
                                 if *generator_delay.read() > 0 {

@@ -60,7 +60,7 @@ impl Maze {
             }
         }
 
-        let mut horiz_walls: Vec<HashSet<SvgLine>> = Vec::new();
+        let mut horiz_walls: Vec<HashSet<SvgLine>> = Vec::with_capacity(width);
         for y in 0..=height {
             let horiz_wall = SvgLine {
                 x1: 0,
@@ -73,7 +73,7 @@ impl Maze {
             horiz_walls.push(new_horiz_wall_set);
         }
 
-        let mut vert_walls: Vec<HashSet<SvgLine>> = Vec::new();
+        let mut vert_walls: Vec<HashSet<SvgLine>> = Vec::with_capacity(height);
         for x in 0..=width {
             let vert_wall = SvgLine {
                 x1: x as i32 * CELL_SIZE,
