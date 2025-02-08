@@ -7,6 +7,7 @@ use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_optio
 use crate::ui::components::{GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
 use crate::cell::Coord;
+use crate::maze_svg_render::MazeSvg;
 
 pub fn launch_app() {
     dioxus::launch(App);
@@ -84,21 +85,21 @@ fn App() -> Element {
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
                         working.set(true);
 
-                        wasm_bindgen_futures::spawn_local(async move {
+                        // wasm_bindgen_futures::spawn_local(async move {
                             maze.set(Maze::new(*height.read(), *width.read()));
-                            TimeoutFuture::new(200).await;
+                            // TimeoutFuture::new(200).await;
 
                             while generator_algo.read().status() != &GeneratorStatus::Done {
                                 generator_algo.write().create_maze(&mut maze);
                                 if *generator_delay.read() > 0 {
-                                    TimeoutFuture::new(*generator_delay.read() as u32).await;
+                                    // TimeoutFuture::new(*generator_delay.read() as u32).await;
                                 }
                             }
                             if generator_algo.read().status() == &GeneratorStatus::Done {
                                 generated.set(true);
                                 working.set(false);
                             }
-                        });
+                        // });
                     }
                 }
             }
@@ -123,7 +124,7 @@ fn App() -> Element {
                     onclick: move |_| {
                         working.set(true);
 
-                        wasm_bindgen_futures::spawn_local(async move {
+                        // wasm_bindgen_futures::spawn_local(async move {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
                                 solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
@@ -132,14 +133,14 @@ fn App() -> Element {
                             while solver_algo.read().status() != &SolverStatus::Done {
                                 solver_algo.write().find_solution(&mut maze);
                                 if *solver_delay.read() > 0 {
-                                    TimeoutFuture::new(*solver_delay.read() as u32).await;
+                                    // TimeoutFuture::new(*solver_delay.read() as u32).await;
                                 }
                             }
                             if solver_algo.read().status() == &SolverStatus::Done {
                                 solved.set(true);
                                 working.set(false);
                             }
-                        });
+                        // });
                     }
                 }
             }

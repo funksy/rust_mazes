@@ -6,10 +6,16 @@ const CELL_SIZE: i32 = 3;
 
 #[component]
 pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
-    let maze_svg = use_memo(move || maze.read().svg_render().clone());
+    let mut cells = use_signal(|| maze.read().svg_elements().cells().clone());
+    let mut vert_walls = use_signal(|| maze.read().svg_elements().vert_walls().clone());
+    let mut horiz_walls = use_signal(|| maze.read().svg_elements().horiz_walls().clone());
 
     use_effect(move || {
-       maze.read();
+        let maze = maze.read();
+        let svg_elements = maze.svg_elements();
+        cells.set(svg_elements.cells().clone());
+        vert_walls.set(svg_elements.vert_walls().clone());
+        horiz_walls.set(svg_elements.horiz_walls().clone());
     });
 
     rsx! {
@@ -19,7 +25,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
             g {
                 id: "cells",
                 {
-                    maze_svg.read().cells.iter().map(|cell| {
+                    cells.read().iter().map(|(id, cell)| {
                         rsx!{
                             rect {
                                 x: "{&cell.x}",
@@ -37,7 +43,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
             g {
                 id: "walls",
                 {
-                    maze_svg.read().horiz_walls.iter().flat_map(|horiz_wall_vec| {
+                    horiz_walls.read().iter().flat_map(|horiz_wall_vec| {
                         horiz_wall_vec.iter().map(|wall| {
                             rsx! {
                                 line {
@@ -52,7 +58,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
                 }
 
                 {
-                    maze_svg.read().vert_walls.iter().flat_map(|vert_wall_vec| {
+                    vert_walls.read().iter().flat_map(|vert_wall_vec| {
                         vert_wall_vec.iter().map(|wall| {
                             rsx! {
                                 line {
