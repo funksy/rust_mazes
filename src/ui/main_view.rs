@@ -33,7 +33,7 @@ fn App() -> Element {
     let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
     let generator_delay: Signal<usize> = use_signal(|| 10);
-    let batch_size: Memo<usize> = use_memo(move || (height() * width()) / 200);
+    let batch_size: Memo<usize> = use_memo(move || (height() * width()) / generator_delay());
     let mut generated: Signal<bool> = use_signal(|| false);
 
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
