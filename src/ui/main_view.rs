@@ -7,7 +7,6 @@ use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_optio
 use crate::ui::components::{GeneratorConfig, SolverConfig, MazeRender, Button};
 use crate::maze::Maze;
 use crate::cell::Coord;
-use crate::maze_svg_render::MazeSvg;
 
 pub fn launch_app() {
     dioxus::launch(App);
@@ -34,6 +33,7 @@ fn App() -> Element {
     let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
     let generator_delay: Signal<usize> = use_signal(|| 10);
+    let batch_size: Memo<usize> = use_memo(move || (height() * width()) / 200);
     let mut generated: Signal<bool> = use_signal(|| false);
 
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
@@ -76,7 +76,6 @@ fn App() -> Element {
                     button_text: "Generate maze".to_string(),
                     disabled: *working.read(),
                     onclick: move |_| {
-
                         start_coord_x.set(0);
                         start_coord_y.set(0);
                         finish_coord_x.set(width - 1);
@@ -85,21 +84,32 @@ fn App() -> Element {
                         generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
                         working.set(true);
 
-                        // wasm_bindgen_futures::spawn_local(async move {
+                        wasm_bindgen_futures::spawn_local(async move {
                             maze.set(Maze::new(*height.read(), *width.read()));
-                            // TimeoutFuture::new(200).await;
+                            TimeoutFuture::new(200).await;
+
+                            let mut iterations = 0;
+                            let batch = *batch_size.read();
 
                             while generator_algo.read().status() != &GeneratorStatus::Done {
-                                generator_algo.write().create_maze(&mut maze);
-                                if *generator_delay.read() > 0 {
-                                    // TimeoutFuture::new(*generator_delay.read() as u32).await;
+                                for _ in 0..batch {
+                                    if generator_algo.read().status() == &GeneratorStatus::Done {
+                                        break;
+                                    }
+                                    generator_algo.write().create_maze(&mut maze);
+                                    iterations += 1;
                                 }
+
+                                if *generator_delay.read() > 0 {
+                                        TimeoutFuture::new(*generator_delay.read() as u32).await;
+                                }
+
                             }
                             if generator_algo.read().status() == &GeneratorStatus::Done {
                                 generated.set(true);
                                 working.set(false);
                             }
-                        // });
+                        });
                     }
                 }
             }
@@ -124,23 +134,34 @@ fn App() -> Element {
                     onclick: move |_| {
                         working.set(true);
 
-                        // wasm_bindgen_futures::spawn_local(async move {
+                        wasm_bindgen_futures::spawn_local(async move {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
                                 solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
                                 solved.set(false);
                             }
+
+                            let mut iterations = 0;
+                            let batch = *batch_size.read();
+
                             while solver_algo.read().status() != &SolverStatus::Done {
-                                solver_algo.write().find_solution(&mut maze);
+                                for _ in 0..batch {
+                                    if solver_algo.read().status() == &SolverStatus::Done {
+                                        break;
+                                    }
+                                    solver_algo.write().find_solution(&mut maze);
+                                    iterations += 1;
+                                }
+
                                 if *solver_delay.read() > 0 {
-                                    // TimeoutFuture::new(*solver_delay.read() as u32).await;
+                                    TimeoutFuture::new(*solver_delay.read() as u32).await;
                                 }
                             }
                             if solver_algo.read().status() == &SolverStatus::Done {
                                 solved.set(true);
                                 working.set(false);
                             }
-                        // });
+                        });
                     }
                 }
             }

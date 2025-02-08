@@ -28,6 +28,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
                     cells.read().iter().map(|(id, cell)| {
                         rsx!{
                             rect {
+                                id: "{id.0}x{id.1}",
                                 x: "{&cell.x}",
                                 y: "{&cell.y}",
                                 width: "{&cell.width}",
@@ -47,6 +48,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
                         horiz_wall_vec.iter().map(|wall| {
                             rsx! {
                                 line {
+                                    id: "{wall.x1}x{wall.x2}x{wall.y1}x{wall.y2}",
                                     x1: "{wall.x1}",
                                     y1: "{wall.y1}",
                                     x2: "{wall.x2}",
@@ -62,6 +64,7 @@ pub fn MazeRender(maze: ReadOnlySignal<Maze>) -> Element {
                         vert_wall_vec.iter().map(|wall| {
                             rsx! {
                                 line {
+                                    id: "{wall.x1}x{wall.x2}x{wall.y1}x{wall.y2}",
                                     x1: "{wall.x1}",
                                     y1: "{wall.y1}",
                                     x2: "{wall.x2}",
