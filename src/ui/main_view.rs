@@ -88,7 +88,6 @@ fn App() -> Element {
                             maze.set(Maze::new(*height.read(), *width.read()));
                             TimeoutFuture::new(200).await;
 
-                            let mut iterations = 0;
                             let batch = *batch_size.read();
 
                             while generator_algo.read().status() != &GeneratorStatus::Done {
@@ -97,7 +96,6 @@ fn App() -> Element {
                                         break;
                                     }
                                     generator_algo.write().create_maze(&mut maze);
-                                    iterations += 1;
                                 }
 
                                 if *generator_delay.read() > 0 {
@@ -141,7 +139,6 @@ fn App() -> Element {
                                 solved.set(false);
                             }
 
-                            let mut iterations = 0;
                             let batch = *batch_size.read();
 
                             while solver_algo.read().status() != &SolverStatus::Done {
@@ -150,7 +147,6 @@ fn App() -> Element {
                                         break;
                                     }
                                     solver_algo.write().find_solution(&mut maze);
-                                    iterations += 1;
                                 }
 
                                 if *solver_delay.read() > 0 {
