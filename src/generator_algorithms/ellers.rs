@@ -15,6 +15,7 @@ pub struct Ellers {
     cells: HashMap<Coord, usize>,
     stage: Stage,
     status: GeneratorStatus,
+    rng: rand::rngs::ThreadRng,
 }
 
 enum AddCell {
@@ -65,107 +66,109 @@ impl Ellers {
             cells: HashMap::new(),
             stage: Stage::Horizontal,
             status: GeneratorStatus::Initialized,
+            rng: rand::thread_rng(),
         }
     }
 
     fn process_maze_row(&mut self, maze: &mut Maze) {
         match self.stage {
-            Stage::Horizontal => {
-                let mut rng = rand::thread_rng();
+            Stage::Horizontal => self.horizontal_process(maze),
+            Stage::Vertical => self.vertical_process(maze),
+            Stage::LastRow => self.last_row_process(maze),
+        }
+    }
 
-                if self.current_col < maze.width() {
-                    let current_cell = &Coord{ x: self.current_col, y: self.current_row };
-                    if !self.cells.contains_key(current_cell) {
-                        maze.visit_cell(current_cell);
-                        self.add_new_cell(current_cell, 0, AddCell::NewSet);
-                    }
-                    if self.current_col > 0 {
-                        let previous_cell = &Coord{ x: self.current_col - 1, y: self.current_row };
-                        if self.cells.get(current_cell) != self.cells.get(previous_cell) && rng.gen_bool(0.5) {
-                            self.merge_cell_sets(current_cell, previous_cell);
-                            remove_walls_between_cells(maze, current_cell, 3);
-                        }
-                    }
-                    self.current_col += 1;
+    fn horizontal_process(&mut self, maze: &mut Maze) {
+        if self.current_col < maze.width() {
+            let current_cell = &Coord{ x: self.current_col, y: self.current_row };
+            if !self.cells.contains_key(current_cell) {
+                maze.visit_cell(current_cell);
+                self.add_new_cell(current_cell, 0, AddCell::NewSet);
+            }
+            if self.current_col > 0 {
+                let previous_cell = &Coord{ x: self.current_col - 1, y: self.current_row };
+                if self.cells.get(current_cell) != self.cells.get(previous_cell) && self.rng.gen_bool(0.5) {
+                    self.merge_cell_sets(current_cell, previous_cell);
+                    remove_walls_between_cells(maze, current_cell, 3);
                 }
-                else {
-                    self.current_col = 0;
-                    if self.current_row < maze.height() - 1 {
-                        self.sets_needing_vertical_connection = self.sets.keys().copied().collect();
-                        self.stage = Stage::Vertical;
-                    }
-                    else {
-                        self.stage = Stage::LastRow;
-                    }
-                }
-            },
-            Stage::Vertical => {
-                let mut rng = rand::thread_rng();
-
-                if self.current_col < maze.width() {
-                    if rng.gen_bool(0.5) {
-                        let current_cell = &Coord { x: self.current_col, y: self.current_row };
-                        let next_cell = &Coord { x: self.current_col, y: self.current_row + 1 };
-
-                        let current_set_id = *self.cells.get(current_cell)
-                            .expect("No self.cells entry for current_cell");
-
-                        maze.visit_cell(next_cell);
-                        self.add_new_cell(next_cell, current_set_id, AddCell::AddToSet);
-                        remove_walls_between_cells(maze, current_cell, 2);
-
-                        self.sets_needing_vertical_connection.remove(&current_set_id);
-                    }
-                    self.current_col += 1;
-                }
-                else if self.sets_needing_vertical_connection.len() > 0 {
-                    let (set_id) = match self.sets_needing_vertical_connection.iter().next().cloned() {
-                        Some(set_id) => set_id,
-                        None => panic!("No value in sets_needing_vertical_connection")
-                    };
-                    self.sets_needing_vertical_connection.remove(&set_id);
-
-                    let cells = match self.sets.get(&set_id) {
-                        Some(cells) => cells.clone(),
-                        None => panic!("no entry in sets")
-                    };
-                    let current_row_cells: Vec<&Coord> = cells.iter()
-                        .filter(|cell| cell.y == self.current_row)
-                        .collect();
-                    let random_cell = match current_row_cells.choose(&mut rng) {
-                        Some(coord) => coord,
-                        None => panic!("No cell in current_row_cells")
-                    };
-
-                    let next_cell = Coord{ x: random_cell.x, y: self.current_row + 1 };
-                    maze.visit_cell(&next_cell);
-                    self.add_new_cell(&next_cell, set_id, AddCell::AddToSet);
-                    remove_walls_between_cells(maze, random_cell, 2);
-                }
-                else {
-                    self.current_col = 0;
-                    self.current_row += 1;
-                    self.stage = Stage::Horizontal;
-                }
-            },
-            Stage::LastRow => {
-                if self.current_col < maze.width() - 1 {
-                    let current_cell = &Coord { x: self.current_col, y: self.current_row };
-                    let next_cell = &Coord { x: self.current_col + 1, y: self.current_row };
-                    if self.cells.get(current_cell) != self.cells.get(next_cell) {
-                        self.merge_cell_sets(current_cell, next_cell);
-                        remove_walls_between_cells(maze, current_cell, 1);
-                    }
-                    self.current_col += 1;
-                }
-                else {
-                    self.current_row += 1;
-                }
+            }
+            self.current_col += 1;
+        }
+        else {
+            self.current_col = 0;
+            if self.current_row < maze.height() - 1 {
+                self.sets_needing_vertical_connection = self.sets.keys().copied().collect();
+                self.stage = Stage::Vertical;
+            }
+            else {
+                self.stage = Stage::LastRow;
             }
         }
     }
 
-    #[inline]
+    fn vertical_process(&mut self, maze: &mut Maze) {
+        if self.current_col < maze.width() {
+            if self.rng.gen_bool(0.5) {
+                let current_cell = &Coord { x: self.current_col, y: self.current_row };
+                let next_cell = &Coord { x: self.current_col, y: self.current_row + 1 };
+
+                let current_set_id = *self.cells.get(current_cell)
+                    .expect("No self.cells entry for current_cell");
+
+                maze.visit_cell(next_cell);
+                self.add_new_cell(next_cell, current_set_id, AddCell::AddToSet);
+                remove_walls_between_cells(maze, current_cell, 2);
+
+                self.sets_needing_vertical_connection.remove(&current_set_id);
+            }
+            self.current_col += 1;
+        }
+        else if self.sets_needing_vertical_connection.len() > 0 {
+            let set_id = match self.sets_needing_vertical_connection.iter().next().cloned() {
+                Some(set_id) => set_id,
+                None => panic!("No value in sets_needing_vertical_connection")
+            };
+            self.sets_needing_vertical_connection.remove(&set_id);
+
+            let cells = match self.sets.get(&set_id) {
+                Some(cells) => cells.clone(),
+                None => panic!("no entry in sets")
+            };
+            let current_row_cells: Vec<&Coord> = cells.iter()
+                .filter(|cell| cell.y == self.current_row)
+                .collect();
+            let random_cell = match current_row_cells.choose(&mut self.rng) {
+                Some(coord) => coord,
+                None => panic!("No cell in current_row_cells")
+            };
+
+            let next_cell = Coord{ x: random_cell.x, y: self.current_row + 1 };
+            maze.visit_cell(&next_cell);
+            self.add_new_cell(&next_cell, set_id, AddCell::AddToSet);
+            remove_walls_between_cells(maze, random_cell, 2);
+        }
+        else {
+            self.current_col = 0;
+            self.current_row += 1;
+            self.stage = Stage::Horizontal;
+        }
+    }
+
+    fn last_row_process(&mut self, maze: &mut Maze) {
+        if self.current_col < maze.width() - 1 {
+            let current_cell = &Coord { x: self.current_col, y: self.current_row };
+            let next_cell = &Coord { x: self.current_col + 1, y: self.current_row };
+            if self.cells.get(current_cell) != self.cells.get(next_cell) {
+                self.merge_cell_sets(current_cell, next_cell);
+                remove_walls_between_cells(maze, current_cell, 1);
+            }
+            self.current_col += 1;
+        }
+        else {
+            self.current_row += 1;
+        }
+    }
+    
     fn add_new_cell(&mut self, cell_coord: &Coord, set_id: usize, add_type: AddCell) {
         match add_type {
             AddCell::NewSet => {
@@ -180,7 +183,6 @@ impl Ellers {
         }
     }
 
-    #[inline]
     fn merge_cell_sets(&mut self, first_cell: &Coord, second_cell: &Coord) {
         let first_set_id = *self.cells.get(first_cell).
             expect("No self.cells entry for first_cell");
