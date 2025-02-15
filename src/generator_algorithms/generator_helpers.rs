@@ -75,25 +75,17 @@ pub fn choose_rand_neighbor(maze: &Maze, frontier_cell: &Coord, visited_status: 
     directions.shuffle(&mut thread_rng());
 
     for direction in directions {
-        if direction == 0 && frontier_cell.y > 0 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y - 1, x: frontier_cell.x }).visited() == visited_status {
-                return Ok(direction);
-            }
+        if direction == 0 && frontier_cell.y > 0 && maze.get_cell_ref(&Coord{ y: frontier_cell.y - 1, x: frontier_cell.x }).visited() == visited_status {
+            return Ok(direction);
         }
-        if direction == 1 && frontier_cell.x < maze.width() - 1 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x + 1 }).visited() == visited_status {
-                return Ok(direction);
-            }
+        if direction == 1 && frontier_cell.x < maze.width() - 1 && maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x + 1 }).visited() == visited_status {
+            return Ok(direction);
         }
-        if direction == 2 && frontier_cell.y < maze.height() - 1 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y + 1, x: frontier_cell.x }).visited() == visited_status {
-                return Ok(direction);
-            }
+        if direction == 2 && frontier_cell.y < maze.height() - 1 && maze.get_cell_ref(&Coord{ y: frontier_cell.y + 1, x: frontier_cell.x }).visited() == visited_status {
+            return Ok(direction);
         }
-        if direction == 3 && frontier_cell.x > 0 {
-            if maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x - 1 }).visited() == visited_status {
-                return Ok(direction);
-            }
+        if direction == 3 && frontier_cell.x > 0 && maze.get_cell_ref(&Coord{ y: frontier_cell.y, x: frontier_cell.x - 1 }).visited() == visited_status {
+            return Ok(direction);
         }
     }
     Err("no neighboring cells in that state")

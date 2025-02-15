@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use dioxus::prelude::Signal;
 use crate::cell::{CellState, Coord};
 use crate::maze::Maze;
@@ -44,4 +45,8 @@ pub fn reset_solver(maze: &mut Maze) {
             maze.change_cell_state(&Coord{ x, y}, CellState::Path);
         }
     }
+}
+
+pub fn solved(explored: &HashMap<Coord, Coord>, finish: &Coord) -> bool {
+    explored.contains_key(finish)
 }

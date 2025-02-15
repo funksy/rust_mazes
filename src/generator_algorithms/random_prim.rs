@@ -17,7 +17,7 @@ impl GeneratorAlgo for RandomPrim {
 
         match self.status {
             GeneratorStatus::Initialized => {
-                let start: Coord = random_grid_position(&maze);
+                let start: Coord = random_grid_position(maze);
                 maze.visit_cell(&start);
                 self.add_cells_to_frontier(maze, &start);
                 self.status = GeneratorStatus::InProgress;
@@ -28,7 +28,7 @@ impl GeneratorAlgo for RandomPrim {
                 remove_walls_between_cells(maze, &rand_frontier, direction_of_rand_visited_neighbor);
                 maze.visit_cell(&rand_frontier);
                 self.add_cells_to_frontier(maze, &rand_frontier);
-                if self.frontier.len() == 0 {
+                if self.frontier.is_empty() {
                     self.status = GeneratorStatus::Done;
                 }
             }
@@ -56,29 +56,17 @@ impl RandomPrim {
     fn add_cells_to_frontier(&mut self, maze: &mut Maze, origin: &Coord) {
         let mut new_frontier_cells: Vec<Coord> = Vec::new();
 
-        if origin.y > 0 {
-            if maze.get_cell_ref(&Coord{ y: origin.y - 1, x: origin.x }).visited() == false {
-                // maze.change_cell_state(&Coord{ y: origin.y - 1, x: origin.x }, CellState::Frontier);
-                new_frontier_cells.push(Coord{ y: origin.y - 1, x: origin.x })
-            }
+        if origin.y > 0 && !maze.get_cell_ref(&Coord{ y: origin.y - 1, x: origin.x }).visited() {
+            new_frontier_cells.push(Coord{ y: origin.y - 1, x: origin.x })
         }
-        if origin.y < maze.height() - 1 {
-            if maze.get_cell_ref(&Coord{ y: origin.y + 1, x: origin.x }).visited() == false {
-                // maze.change_cell_state(&Coord{ y: origin.y + 1, x: origin.x }, CellState::Frontier);
-                new_frontier_cells.push(Coord{ y: origin.y + 1, x: origin.x });
-            }
+        if origin.y < maze.height() - 1 && !maze.get_cell_ref(&Coord{ y: origin.y + 1, x: origin.x }).visited() {
+            new_frontier_cells.push(Coord{ y: origin.y + 1, x: origin.x });
         }
-        if origin.x > 0 {
-            if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x - 1 }).visited() == false {
-                // maze.change_cell_state(&Coord{ y: origin.y, x: origin.x - 1 }, CellState::Frontier);
-                new_frontier_cells.push(Coord{ y: origin.y, x: origin.x - 1 });
-            }
+        if origin.x > 0 && !maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x - 1 }).visited() {
+            new_frontier_cells.push(Coord{ y: origin.y, x: origin.x - 1 });
         }
-        if origin.x < maze.width() - 1 {
-            if maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x + 1 }).visited() == false {
-                // maze.change_cell_state(&Coord{ y: origin.y, x: origin.x + 1 }, CellState::Frontier);
-                new_frontier_cells.push(Coord{ y: origin.y, x: origin.x + 1 });
-            }
+        if origin.x < maze.width() - 1 && !maze.get_cell_ref(&Coord{ y: origin.y, x: origin.x + 1 }).visited() {
+            new_frontier_cells.push(Coord{ y: origin.y, x: origin.x + 1 });
         }
 
         for cell in new_frontier_cells {

@@ -39,10 +39,7 @@ impl Cell {
     }
 
     pub fn visited(&self) -> bool {
-        match self.state {
-            CellState::Path => true,
-            _ => false
-        }
+        matches!(self.state, CellState::Path)
     }
 
     pub fn visit(&mut self) {

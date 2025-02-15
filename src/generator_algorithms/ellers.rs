@@ -123,7 +123,7 @@ impl Ellers {
             }
             self.current_col += 1;
         }
-        else if self.sets_needing_vertical_connection.len() > 0 {
+        else if !self.sets_needing_vertical_connection.is_empty() {
             let set_id = match self.sets_needing_vertical_connection.iter().next().cloned() {
                 Some(set_id) => set_id,
                 None => panic!("No value in sets_needing_vertical_connection")

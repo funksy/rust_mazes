@@ -3,7 +3,7 @@ use std::collections::{HashMap};
 use dioxus::prelude::*;
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::solver_algorithms::solver_helpers::{reset_solver, SolverAlgo, SolverStatus};
+use crate::solver_algorithms::solver_helpers::{reset_solver, solved, SolverAlgo, SolverStatus};
 
 pub struct DepthFirstSearch {
     start: Coord,
@@ -28,7 +28,7 @@ impl SolverAlgo for DepthFirstSearch {
             SolverStatus::InProgress => {
                 self.current_cell = self.frontier.pop().unwrap();
                 self.add_adjacent_cells_to_frontier(maze, &self.current_cell.clone());
-                if self.explored.contains_key(&self.finish) {
+                if solved(&self.explored, &self.finish) {
                     self.current_cell = *self.explored.get(&self.finish).unwrap();
                     self.status = SolverStatus::Solved;
                 }
@@ -59,11 +59,11 @@ impl SolverAlgo for DepthFirstSearch {
 impl DepthFirstSearch {
     pub fn new(start: &Coord, finish: &Coord) -> Self {
         DepthFirstSearch {
-            start: start.clone(),
-            finish: finish.clone(),
+            start: *start,
+            finish: *finish,
             frontier: Vec::new(),
             explored: HashMap::new(),
-            current_cell: start.clone(),
+            current_cell: *start,
             status: SolverStatus::Initialized,
         }
     }
@@ -73,7 +73,7 @@ impl DepthFirstSearch {
 
         if !cell.walls()[0] && !self.explored.contains_key(&Coord{ y: cell.coord().y - 1, x: cell.coord().x }) {
             let new_frontier_cell = Coord{ y: cell.coord().y - 1, x: cell.coord().x };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
+            self.explored.insert(new_frontier_cell, *current_cell);
             self.frontier.push(new_frontier_cell);
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
@@ -81,7 +81,7 @@ impl DepthFirstSearch {
         }
         if !cell.walls()[1] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x + 1 }) {
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x + 1 };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
+            self.explored.insert(new_frontier_cell, *current_cell);
             self.frontier.push(new_frontier_cell);
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
@@ -89,7 +89,7 @@ impl DepthFirstSearch {
         }
         if !cell.walls()[2] && !self.explored.contains_key(&Coord{ y: cell.coord().y + 1, x: cell.coord().x }) {
             let new_frontier_cell = Coord{ y: cell.coord().y + 1, x: cell.coord().x };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
+            self.explored.insert(new_frontier_cell, *current_cell);
             self.frontier.push(new_frontier_cell);
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
@@ -97,7 +97,7 @@ impl DepthFirstSearch {
         }
         if !cell.walls()[3] && !self.explored.contains_key(&Coord{ y: cell.coord().y, x: cell.coord().x - 1 }) {
             let new_frontier_cell = Coord{ y: cell.coord().y, x: cell.coord().x - 1 };
-            self.explored.insert(new_frontier_cell, current_cell.clone());
+            self.explored.insert(new_frontier_cell, *current_cell);
             self.frontier.push(new_frontier_cell);
             if new_frontier_cell != self.start && new_frontier_cell != self.finish {
                 maze.change_cell_state(&new_frontier_cell, CellState::Frontier);
