@@ -5,7 +5,7 @@ use dioxus::prelude::*;
 
 use crate::maze::Maze;
 use crate::cell::{CellState, Coord};
-use crate::solver_algorithms::solver_helpers::{reset_solver, SolverAlgo, SolverStatus};
+use crate::solver_algorithms::solver_helpers::{reset_solver, solved, SolverAlgo, SolverStatus};
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct DistanceToStart {
@@ -54,7 +54,7 @@ impl SolverAlgo for Djikstras {
                 self.current_cell = temp.cell_coord;
                 let distance: usize = temp.distance;
                 self.add_adjacent_cells_to_frontier(maze, distance);
-                if self.explored.contains_key(&self.finish) {
+                if solved(&self.explored, &self.finish) {
                     self.current_cell = *self.explored.get(&self.finish).unwrap();
                     self.status = SolverStatus::Solved;
                 }
@@ -85,11 +85,11 @@ impl SolverAlgo for Djikstras {
 impl Djikstras {
     pub fn new(start: &Coord, finish: &Coord) -> Self {
         Djikstras {
-            start: start.clone(),
-            finish: finish.clone(),
+            start: *start,
+            finish: *finish,
             explored: HashMap::new(),
             frontier: BinaryHeap::new(),
-            current_cell: start.clone(),
+            current_cell: *start,
             status: SolverStatus::Initialized,
         }
     }

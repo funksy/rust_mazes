@@ -150,7 +150,7 @@ impl MazeSvg {
 
         let containing_wall = match walls_vec[walls_vec_i]
             .par_iter()
-            .find_any(|containing_wall| self.contains_wall(&wall_to_remove, containing_wall))
+            .find_any(|containing_wall| self.contains_wall(wall_to_remove, containing_wall))
             .cloned() {
             Some(wall) => wall,
             None => panic!("Containing wall doesn't exist."),
