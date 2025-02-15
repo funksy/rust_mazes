@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use dioxus::prelude::Signal;
-use crate::cell::{CellState, Coord};
-use crate::maze::Maze;
+use crate::structures::cell::{CellState, Coord};
+use crate::structures::maze::Maze;
 use crate::solver_algorithms::breadth_first_search::BreadthFirstSearch;
 use crate::solver_algorithms::depth_first_search::DepthFirstSearch;
 use crate::solver_algorithms::djikstras::Djikstras;

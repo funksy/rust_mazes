@@ -1,7 +1,7 @@
 use std::collections::{HashSet, HashMap};
 use rayon::prelude::*;
 
-use crate::cell::{CellState, Coord};
+use crate::structures::cell::{CellState, Coord};
 
 #[derive(PartialEq)]
 pub struct MazeSvg {

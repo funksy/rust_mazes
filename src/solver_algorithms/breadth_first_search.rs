@@ -2,8 +2,8 @@ use std::collections::{HashMap, VecDeque};
 
 use dioxus::prelude::*;
 
-use crate::maze::Maze;
-use crate::cell::{CellState, Coord};
+use crate::structures::maze::Maze;
+use crate::structures::cell::{CellState, Coord};
 use crate::solver_algorithms::solver_helpers::{reset_solver, solved, SolverAlgo, SolverStatus};
 
 pub struct BreadthFirstSearch {

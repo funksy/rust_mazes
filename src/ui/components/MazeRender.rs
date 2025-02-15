@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::maze::Maze;
+use crate::structures::maze::Maze;
 
 const CELL_SIZE: i32 = 3;
 

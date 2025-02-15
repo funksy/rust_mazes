@@ -2,8 +2,8 @@ use dioxus::prelude::Signal;
 use rand::{thread_rng, Rng};
 use rand::seq::SliceRandom;
 
-use crate::maze::Maze;
-use crate::cell::Coord;
+use crate::structures::maze::Maze;
+use crate::structures::cell::Coord;
 use crate::generator_algorithms::ellers::Ellers;
 use crate::generator_algorithms::random_prim::RandomPrim;
 use crate::generator_algorithms::recursive_backtracker::RecursiveBacktracker;

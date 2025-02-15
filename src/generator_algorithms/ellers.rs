@@ -2,8 +2,8 @@ use std::collections::{HashMap, HashSet};
 use rand::{Rng};
 use rand::seq::SliceRandom;
 use dioxus::prelude::*;
-use crate::maze::Maze;
-use crate::cell::Coord;
+use crate::structures::maze::Maze;
+use crate::structures::cell::Coord;
 use crate::generator_algorithms::generator_helpers::{remove_walls_between_cells, GeneratorAlgo, GeneratorStatus};
 
 pub struct Ellers {

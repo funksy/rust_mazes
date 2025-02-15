@@ -5,8 +5,8 @@ use wasm_bindgen_futures;
 use crate::generator_algorithms::generator_helpers::{get_generator_algo, get_generator_options, GeneratorStatus};
 use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_options, SolverStatus};
 use crate::ui::components::{GeneratorConfig, SolverConfig, MazeRender, Button};
-use crate::maze::Maze;
-use crate::cell::Coord;
+use crate::structures::maze::Maze;
+use crate::structures::cell::Coord;
 
 pub fn launch_app() {
     dioxus::launch(App);

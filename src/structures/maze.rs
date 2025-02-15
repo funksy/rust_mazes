@@ -1,5 +1,5 @@
-use crate::cell::{Cell, CellState, Coord};
-use crate::maze_svg_render::MazeSvg;
+use crate::structures::cell::{Cell, CellState, Coord};
+use crate::structures::maze_svg_render::MazeSvg;
 
 #[derive(PartialEq)]
 pub struct Maze {

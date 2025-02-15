@@ -2,8 +2,8 @@ use rand::{thread_rng, Rng};
 use dioxus::prelude::*;
 use indexmap::IndexSet;
 
-use crate::maze::Maze;
-use crate::cell::Coord;
+use crate::structures::maze::Maze;
+use crate::structures::cell::Coord;
 use crate::generator_algorithms::generator_helpers::{GeneratorStatus, random_grid_position, remove_walls_between_cells, choose_rand_neighbor, GeneratorAlgo};
 
 pub struct RandomPrim {
