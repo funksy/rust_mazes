@@ -4,3 +4,5 @@ pub mod Button;
 pub mod NumInput;
 pub mod GeneratorConfig;
 pub mod SolverConfig;
+pub mod GeneratorConfigNew;
+pub mod SolverConfigNew;
