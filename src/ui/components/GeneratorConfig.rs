@@ -14,16 +14,16 @@ pub fn GeneratorConfig(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
     let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
 
-    let mut generator_speed: Signal<usize> = use_signal(|| 1);
+    let generator_speed: Signal<usize> = use_signal(|| 1);
     let mut generator_delay: Signal<u32> = use_signal(|| *generator_speed.read() as u32 * 10);
     let mut batch_size: Signal<usize> = use_signal(|| (*width.read() * *height.read()) / 10);
 
     use_effect(move || {
         generator_delay.set(*generator_speed.read() as u32 * 10);
-        if (*width.read() * *height.read() > 100) {
+        if *width.read() * *height.read() > 100 {
             batch_size.set((*width.read() * *height.read()) / 100);
         }
-        else if (*width.read() * *height.read() > 10) {
+        else if *width.read() * *height.read() > 10 {
             batch_size.set((*width.read() * *height.read()) / 10);
         }
         else {

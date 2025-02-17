@@ -2,7 +2,6 @@ use dioxus::prelude::*;
 use gloo_timers::future::TimeoutFuture;
 use wasm_bindgen_futures;
 
-use crate::generator_algorithms::generator_helpers::get_generator_algo;
 use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_options, SolverStatus};
 use crate::structures::cell::Coord;
 use crate::structures::maze::Maze;
@@ -13,8 +12,8 @@ pub fn SolverConfig(maze: Signal<Maze>, generated: Signal<bool>, working: Signal
     let height: Memo<usize> = use_memo(move || { maze.read().height() });
     let width: Memo<usize> = use_memo(move || { maze.read().width() });
 
-    let mut start_coord_x: Signal<usize> = use_signal(|| 0);
-    let mut start_coord_y: Signal<usize> = use_signal(|| 0);
+    let start_coord_x: Signal<usize> = use_signal(|| 0);
+    let start_coord_y: Signal<usize> = use_signal(|| 0);
     let mut finish_coord_x: Signal<usize> = use_signal(|| maze.read().width() - 1);
     let mut finish_coord_y: Signal<usize> = use_signal(|| maze.read().height() - 1);
     let mut start_coord: Signal<Coord> = use_signal(|| { Coord{ x: start_coord_x(), y: start_coord_y() } });
@@ -24,7 +23,7 @@ pub fn SolverConfig(maze: Signal<Maze>, generated: Signal<bool>, working: Signal
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
     let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
 
-    let mut solver_speed: Signal<usize> = use_signal(|| 1);
+    let solver_speed: Signal<usize> = use_signal(|| 1);
     let mut solver_delay: Signal<u32> = use_signal(|| *solver_speed.read() as u32 * 10);
     let mut batch_size: Signal<usize> = use_signal(|| (maze.read().width() * maze.read().height()) / 50);
 
@@ -39,10 +38,10 @@ pub fn SolverConfig(maze: Signal<Maze>, generated: Signal<bool>, working: Signal
 
     use_effect(move || {
         solver_delay.set(*solver_speed.read() as u32 * 10);
-        if (*width.read() * *height.read() > 100) {
+        if *width.read() * *height.read() > 100 {
             batch_size.set((*width.read() * *height.read()) / 100);
         }
-        else if (*width.read() * *height.read() > 10) {
+        else if *width.read() * *height.read() > 10 {
             batch_size.set((*width.read() * *height.read()) / 10);
         }
         else {

@@ -2,7 +2,6 @@ use dioxus::prelude::*;
 
 use crate::ui::components::{GeneratorConfig::GeneratorConfig, MazeRender::MazeRender, SolverConfig::SolverConfig};
 use crate::structures::maze::Maze;
-use crate::structures::cell::Coord;
 
 pub fn launch_app() {
     dioxus::launch(App);

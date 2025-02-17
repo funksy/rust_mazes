@@ -1,4 +1,3 @@
-use dioxus::html::g::min;
 use dioxus::prelude::*;
 
 #[component]

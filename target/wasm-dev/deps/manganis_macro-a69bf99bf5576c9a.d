@@ -1,0 +1,8 @@
+C:\Users\johnp\Programming\personal_projects\rust\maze_generator\target\wasm-dev\deps\manganis_macro-a69bf99bf5576c9a.dll: C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src/lib.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\asset.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\linker.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\../README.md
+
+C:\Users\johnp\Programming\personal_projects\rust\maze_generator\target\wasm-dev\deps\manganis_macro-a69bf99bf5576c9a.d: C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src/lib.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\asset.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\linker.rs C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\../README.md
+
+C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src/lib.rs:
+C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\asset.rs:
+C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\linker.rs:
+C:\Users\johnp\scoop\persist\rustup\.cargo\registry\src\index.crates.io-6f17d22bba15001f\manganis-macro-0.6.1\src\../README.md:
