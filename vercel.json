@@ -1,4 +1,0 @@
-{
-  "buildCommand": "chmod +x build.sh && ./build.sh",
-  "outputDirectory": "target/dx/maze_generator/release/web/public"
-}
