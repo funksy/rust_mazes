@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::ui::components::{GeneratorConfigNew::GeneratorConfigNew, MazeRender::MazeRender, SolverConfigNew::SolverConfigNew};
+use crate::ui::components::{GeneratorConfig::GeneratorConfig, MazeRender::MazeRender, SolverConfig::SolverConfig};
 use crate::structures::maze::Maze;
 use crate::structures::cell::Coord;
 
@@ -22,12 +22,12 @@ fn App() -> Element {
         div {
             id: "sidebar",
             h1 { "Mazer" },
-            GeneratorConfigNew {
+            GeneratorConfig {
                 maze: maze,
                 generated: generated,
                 working: working,
             }
-            SolverConfigNew {
+            SolverConfig {
                 maze: maze,
                 generated: generated,
                 working: working,
