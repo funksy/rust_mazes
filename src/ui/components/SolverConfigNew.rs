@@ -6,7 +6,7 @@ use crate::generator_algorithms::generator_helpers::get_generator_algo;
 use crate::solver_algorithms::solver_helpers::{get_solver_algo, get_solver_options, SolverStatus};
 use crate::structures::cell::Coord;
 use crate::structures::maze::Maze;
-use crate::ui::components::{Dropdown::Dropdown, NumInput::NumInput, Button::Button};
+use crate::ui::components::{Dropdown::Dropdown, NumInput::NumInput, Button::Button, NumSlider::NumSlider};
 
 #[component]
 pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Signal<bool>) -> Element {
@@ -25,7 +25,9 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
     let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
 
-    let solver_delay: u32 = 10;
+    let mut solver_speed: Signal<usize> = use_signal(|| 2);
+    let mut solver_delay: Signal<u32> = use_signal(|| *solver_speed.read() as u32 * 10);
+    let mut batch_size: Signal<usize> = use_signal(|| (maze.read().width() * maze.read().height()) / 150);
 
     use_effect(move || {
         solver_algo_choice();
@@ -36,6 +38,10 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
         generated();
         finish_coord_x.set(maze.read().width() - 1);
         finish_coord_y.set(maze.read().height() - 1);
+    });
+
+    use_effect(move || {
+        solver_delay.set(*solver_speed.read() as u32 * 10);
     });
 
     rsx! {
@@ -55,30 +61,26 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
                     }
                     div {
                         id: "start-finish-config",
+                        label { for: "start-coord-config", "Starting Cell" }
                         div {
-                            label { for: "start-coord-config", "Starting Cell" }
-                            div {
-                                id: "start-coord-config",
-                                label { for: "start-coord-x", "x:" },
-                                NumInput {
-                                    id: "start-coord-x",
-                                    value: start_coord_x,
-                                    disabled: *working.read(),
-                                    max_val: maze.read().width() - 1,
-                                    min_val: 0,
-                                }
-                                label { for: "start-coord-y", "y:" },
-                                NumInput {
-                                    id: "start-coord-y",
-                                    value: start_coord_y,
-                                    disabled: *working.read(),
-                                    max_val: maze.read().width() - 1,
-                                    min_val: 0,
-                                }
+                            id: "start-coord-config",
+                            label { for: "start-coord-x", "x:" },
+                            NumInput {
+                                id: "start-coord-x",
+                                value: start_coord_x,
+                                disabled: *working.read(),
+                                max_val: maze.read().width() - 1,
+                                min_val: 0,
+                            }
+                            label { for: "start-coord-y", "y:" },
+                            NumInput {
+                                id: "start-coord-y",
+                                value: start_coord_y,
+                                disabled: *working.read(),
+                                max_val: maze.read().width() - 1,
+                                min_val: 0,
                             }
                         }
-                    }
-                    div {
                         label { for: "finish-coord-config", "Finishing Cell" },
                         div {
                             id: "finish-coord-config",
@@ -100,40 +102,52 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
                             }
                         }
                     }
+                    div {
+                        id: "solver-speed-config",
+                        label { for: "solver-speed-config", "Speed" },
+                        NumSlider {
+                            id: "generator-speed-slider",
+                            value: solver_speed,
+                            disabled: *working.read(),
+                            max_val: 4,
+                            min_val: 0,
+                            step_val: 1,
+                        }
+                    }
                 }
             }
-        }
-        Button {
-            button_text: "Solve maze".to_string(),
-            disabled: !*generated.read() || *working.read(),
-            onclick: move |_| {
-                working.set(true);
-                wasm_bindgen_futures::spawn_local(async move {
-                            if solved() {
-                                solver_algo.write().reset(&mut maze);
-                                solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
-                                solved.set(false);
-                            }
+            Button {
+                button_text: "Solve maze".to_string(),
+                disabled: !*generated.read() || *working.read(),
+                onclick: move |_| {
+                    working.set(true);
+                    wasm_bindgen_futures::spawn_local(async move {
+                        if solved() {
+                            solver_algo.write().reset(&mut maze);
+                            solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
+                            solved.set(false);
+                        }
 
-                            // let batch = *batch_size.read();
+                        // let batch = *batch_size.read();
 
-                            while solver_algo.read().status() != &SolverStatus::Done {
-                                // for _ in 0..batch {
-                                //     if solver_algo.read().status() == &SolverStatus::Done {
-                                //         break;
-                                //     }
-                                    solver_algo.write().find_solution(&mut maze);
-                                // }
-
-                                if solver_delay > 0 {
-                                    TimeoutFuture::new(solver_delay).await;
+                        while solver_algo.read().status() != &SolverStatus::Done {
+                            for _ in 0..*batch_size.read() {
+                                if solver_algo.read().status() == &SolverStatus::Done {
+                                    break;
                                 }
+                                solver_algo.write().find_solution(&mut maze);
                             }
-                            if solver_algo.read().status() == &SolverStatus::Done {
-                                solved.set(true);
-                                working.set(false);
+
+                            if *solver_delay.read() > 0 {
+                                TimeoutFuture::new(*solver_delay.read()).await;
                             }
-                        });
+                        }
+                        if solver_algo.read().status() == &SolverStatus::Done {
+                            solved.set(true);
+                            working.set(false);
+                        }
+                    });
+                }
             }
         }
     }
