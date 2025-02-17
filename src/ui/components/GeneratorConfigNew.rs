@@ -14,10 +14,7 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
     let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
 
-    use_effect(move || {
-        generator_algo_choice();
-        generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
-    });
+    let generator_delay: u32 = 10;
 
     rsx!{
         div {
@@ -56,14 +53,14 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
                             min_val: 2,
                         }
                     }
-                    label { for: "generator-delay-config", "Render Delay (ms)" }
-                    NumInput {
-                        id: "generator-delay-config",
-                        value: use_signal(|| 20 as usize),
-                        disabled: *working.read(),
-                        max_val: 100,
-                        min_val: 0,
-                    }
+                    // label { for: "generator-delay-config", "Render Delay (ms)" }
+                    // NumInput {
+                    //     id: "generator-delay-config",
+                    //     value: use_signal(|| 20 as usize),
+                    //     disabled: *working.read(),
+                    //     max_val: 100,
+                    //     min_val: 0,
+                    // }
                 }
             }
             Button {
@@ -72,6 +69,7 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
                 onclick: move |_| {
                     generated.set(false);
                     working.set(true);
+                    generator_algo.set(get_generator_algo(generator_algo_choice.read().as_str()));
 
                     wasm_bindgen_futures::spawn_local(async move {
                             maze.set(Maze::new(*height.read(), *width.read()));
@@ -87,9 +85,9 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
                                 generator_algo.write().create_maze(&mut maze);
                                 // }
 
-                                // if *generator_delay.read() > 0 {
-                                //         TimeoutFuture::new(*generator_delay.read() as u32).await;
-                                // }
+                                if generator_delay > 0 {
+                                        TimeoutFuture::new(generator_delay).await;
+                                }
 
                             }
                             if generator_algo.read().status() == &GeneratorStatus::Done {

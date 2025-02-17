@@ -25,9 +25,17 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
     let solver_algo_choice: Signal<String> = use_signal(|| "breadth_first_search".to_string());
     let mut solver_algo = use_signal(|| get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
 
+    let solver_delay: u32 = 10;
+
     use_effect(move || {
         solver_algo_choice();
         solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
+    });
+
+    use_effect(move || {
+        generated();
+        finish_coord_x.set(maze.read().width() - 1);
+        finish_coord_y.set(maze.read().height() - 1);
     });
 
     rsx! {
@@ -100,7 +108,7 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
             disabled: !*generated.read() || *working.read(),
             onclick: move |_| {
                 working.set(true);
-                // wasm_bindgen_futures::spawn_local(async move {
+                wasm_bindgen_futures::spawn_local(async move {
                             if solved() {
                                 solver_algo.write().reset(&mut maze);
                                 solver_algo.set(get_solver_algo(solver_algo_choice.read().as_str(), &start_coord(), &finish_coord()));
@@ -117,15 +125,15 @@ pub fn SolverConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Sig
                                     solver_algo.write().find_solution(&mut maze);
                                 // }
 
-                                // if *solver_delay.read() > 0 {
-                                //     TimeoutFuture::new(*solver_delay.read() as u32).await;
-                                // }
+                                if solver_delay > 0 {
+                                    TimeoutFuture::new(solver_delay).await;
+                                }
                             }
                             if solver_algo.read().status() == &SolverStatus::Done {
                                 solved.set(true);
                                 working.set(false);
                             }
-                        // });
+                        });
             }
         }
     }
