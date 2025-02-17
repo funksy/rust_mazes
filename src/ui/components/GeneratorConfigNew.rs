@@ -4,7 +4,7 @@ use wasm_bindgen_futures;
 
 use crate::generator_algorithms::generator_helpers::{get_generator_algo, get_generator_options, GeneratorStatus};
 use crate::structures::maze::Maze;
-use crate::ui::components::{Button::Button, Dropdown::Dropdown, NumInput::NumInput};
+use crate::ui::components::{Button::Button, Dropdown::Dropdown, NumInput::NumInput, NumSlider::NumSlider};
 
 #[component]
 pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: Signal<bool>) -> Element {
@@ -14,7 +14,14 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
     let generator_algo_choice: Signal<String> = use_signal(|| "ellers".to_string());
     let mut generator_algo = use_signal(|| get_generator_algo(generator_algo_choice.read().as_str()));
 
-    let generator_delay: u32 = 10;
+    let mut generator_speed: Signal<usize> = use_signal(|| 2);
+    let mut generator_delay: Signal<u32> = use_signal(|| *generator_speed.read() as u32 * 10);
+    let mut batch_size: Signal<usize> = use_signal(|| (*width.read() * *height.read()) / 150);
+
+    use_effect(move || {
+        generator_delay.set(*generator_speed.read() as u32 * 10);
+        batch_size.set((*width.read() * *height.read()) / 100);
+    });
 
     rsx!{
         div {
@@ -53,14 +60,18 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
                             min_val: 2,
                         }
                     }
-                    // label { for: "generator-delay-config", "Render Delay (ms)" }
-                    // NumInput {
-                    //     id: "generator-delay-config",
-                    //     value: use_signal(|| 20 as usize),
-                    //     disabled: *working.read(),
-                    //     max_val: 100,
-                    //     min_val: 0,
-                    // }
+                    div {
+                        id: "generator-speed-config",
+                        label { for: "generator-speed-slider", "Speed"}
+                        NumSlider {
+                            id: "generator-speed-slider",
+                            value: generator_speed,
+                            disabled: *working.read(),
+                            max_val: 4,
+                            min_val: 0,
+                            step_val: 1,
+                        }
+                    }
                 }
             }
             Button {
@@ -75,18 +86,16 @@ pub fn GeneratorConfigNew(maze: Signal<Maze>, generated: Signal<bool>, working: 
                             maze.set(Maze::new(*height.read(), *width.read()));
                             TimeoutFuture::new(200).await;
 
-                            // let batch = *batch_size.read();
-
                             while generator_algo.read().status() != &GeneratorStatus::Done {
-                                // for _ in 0..batch {
-                                //     if generator_algo.read().status() == &GeneratorStatus::Done {
-                                //         break;
-                                //     }
+                                for _ in 0..*batch_size.read() {
+                                    if generator_algo.read().status() == &GeneratorStatus::Done {
+                                        break;
+                                    }
                                 generator_algo.write().create_maze(&mut maze);
-                                // }
+                                }
 
-                                if generator_delay > 0 {
-                                        TimeoutFuture::new(generator_delay).await;
+                                if *generator_delay.read() > 0 {
+                                        TimeoutFuture::new(*generator_delay.read()).await;
                                 }
 
                             }
