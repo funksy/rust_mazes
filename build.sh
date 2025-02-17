@@ -5,9 +5,6 @@ if ! command -v rustup &> /dev/null; then
     source $HOME/.cargo/env
 fi
 
-# Add wasm target
-rustup target add wasm32-unknown-unknown
-
 # Install dioxus-cli
 cargo install dioxus-cli@0.6.1
 
